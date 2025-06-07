@@ -1,7 +1,7 @@
 
 cc = g++
-# cflags = -Wall -pedantic -O3 -std=c++20 # quando si usa valgrind non si usa l'opzione fsanitize
-cflags = -Wall -pedantic -O0 -std=c++20 -g
+cflags = -Wall -pedantic -O3 -std=c++20 # quando si usa valgrind non si usa l'opzione fsanitize
+# cflags = -Wall -pedantic -O0 -std=c++20 -g
 
 objects = main.o test.o mytest.o container.o exc1as.o exc1af.o exc1bs.o exc1bf.o
 # objects = main.o mytest.o

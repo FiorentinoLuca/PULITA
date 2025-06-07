@@ -9,7 +9,7 @@ namespace lasd {
 template <typename Data>
 inline bool LinearContainer<Data>::operator==(const LinearContainer<Data>& other) 
   const noexcept {
-    if (size != other.size)
+    if (Size() != other.Size())
                              return false;
     bool diffAbsence = true;
     for (ulong i = 0; diffAbsence && i < size && i < other.size; i++)

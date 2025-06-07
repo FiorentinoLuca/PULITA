@@ -112,9 +112,6 @@ protected:
   static ulong mod(int, int);  
   virtual
   void Transfer(Vector<Data>&, ulong, int, ulong);
-  
-  using LinearContainer<Data>::operator==; 
-  using LinearContainer<Data>::operator!=;
 
 };
 

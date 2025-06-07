@@ -43,10 +43,8 @@ public:
   /* ************************************************************************ */
 
   // Comparison operators
-  virtual
   bool operator==(const LinearContainer<Data>&) const noexcept; // Comparison of abstract types is possible.
   
-  virtual
   bool operator!=(const LinearContainer<Data>&) const noexcept; // Comparison of abstract types is possible.
 
   /* ************************************************************************ */
@@ -81,6 +79,8 @@ public:
   // Specific member function (inherited from PostOrderTraversableContainer)
 
   void PostOrderTraverse(TraverseFun) const override; // Override PostOrderTraversableContainer member
+
+  using Container::Size;
 
 };
 

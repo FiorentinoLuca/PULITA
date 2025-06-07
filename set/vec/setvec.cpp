@@ -68,10 +68,10 @@ SetVec<Data>& SetVec<Data>::operator=(SetVec<Data>&& other)
 template <typename Data>
 inline bool SetVec<Data>::operator==(const SetVec<Data>& other)
   const noexcept {
-    if (size != other.size)
+    if (numElements != other.numElements)
       return false;
     bool diffAbsence = true;
-    for (ulong i = 0; diffAbsence && i < size && i < other.size; i++)
+    for (ulong i = 0; diffAbsence && i < numElements; i++)
     {
       diffAbsence = (other[i] == operator[](i))?(diffAbsence):(false);
     }
@@ -86,7 +86,7 @@ inline bool SetVec<Data>::operator!=(const SetVec<Data>& other) const noexcept {
 template <typename Data>
 inline const Data& SetVec<Data>::Min()
   const {
-    if (size == 0) throw std::length_error("Set is empty");
+    if (Empty()) throw std::length_error("Set is empty");
   return (*this)[0];
 }
 
@@ -109,7 +109,7 @@ inline void SetVec<Data>::RemoveMin() {
 template <typename Data>
 inline const Data& SetVec<Data>::Max()
   const {
-    if (size == 0) throw std::length_error("Set is empty");
+    if (Empty()) throw std::length_error("Set is empty");
     return (*this)[numElements - 1];
 }
 
@@ -285,6 +285,11 @@ void SetVec<Data>::Clear()
 }
 
 template <typename Data>
+inline bool SetVec<Data>::Empty() const noexcept {
+  return (numElements == 0);
+}
+
+template <typename Data>
 ulong SetVec<Data>::Size()
   const noexcept {
     return numElements;
@@ -300,6 +305,24 @@ void SetVec<Data>::Traverse(typename TraversableContainer<Data>::TraverseFun f)
 }
 
 template <typename Data>
+void SetVec<Data>::PreOrderTraverse(typename TraversableContainer<Data>::TraverseFun f)
+  const {
+    for (ulong i = 0; i < numElements; ++i)
+    {
+        f((*this)[i]);
+    }
+}
+
+template <typename Data>
+void SetVec<Data>::PostOrderTraverse(typename TraversableContainer<Data>::TraverseFun f)
+  const {
+    for (ulong i = numElements; i > 0; --i)
+    {
+        f((*this)[i-1]);
+    }
+}
+
+template <typename Data>
 Data& SetVec<Data>::operator[](ulong idx)
 {
     
@@ -307,6 +330,18 @@ Data& SetVec<Data>::operator[](ulong idx)
     throw std::out_of_range("Index out of range");
   
   return Vector<Data>::operator[](mod(idx + head, size));
+}
+
+template <typename Data>
+inline const Data& SetVec<Data>::Front() const {
+  if (numElements == 0) throw std::length_error("Set is empty");
+  return (*this)[0];
+}
+
+template <typename Data>
+inline const Data& SetVec<Data>::Back() const {
+  if (numElements == 0) throw std::length_error("Set is empty");
+  return (*this)[numElements - 1];
 }
 
 template <typename Data>

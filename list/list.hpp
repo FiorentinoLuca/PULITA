@@ -205,8 +205,6 @@ protected:
   
   Node* Clone(Node*&) const;
   void postorderrecursion(Node *node, TraverseFun fun) const;
-  using LinearContainer<Data>::operator==;
-  using LinearContainer<Data>::operator!=;
 
 };
 

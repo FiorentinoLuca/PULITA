@@ -129,8 +129,6 @@ protected:
   using List<Data>::head;
   using List<Data>::tail;
 
-  using LinearContainer<Data>::operator==;
-  using LinearContainer<Data>::operator!=;
   using Node = typename List<Data>::Node;
   const Data& getData(typename List<Data>::Node**) const;
   Node** Reach(Node **, ulong, Node**& ) const;

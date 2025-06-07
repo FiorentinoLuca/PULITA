@@ -222,7 +222,7 @@ namespace myT
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),
-      lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),
+      lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),
@@ -296,7 +296,7 @@ namespace myT
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),
-      lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),
+      lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),
@@ -373,14 +373,14 @@ namespace myT
     lasd::SortableLinearContainer<Data> &sortableLinearSortVec2Container;
     lasd::List<Data> &list1;
     lasd::List<Data> &list2;
-    lasd::Set<Data> &setVec1;
-    lasd::Set<Data> &setVec2;
+    lasd::Set<Data> &setVec;
+    lasd::Set<Data> &setLst;
     lasd::Vector<Data> &vector1;
     lasd::Vector<Data> &vector2;
     lasd::SetLst<Data> &setLst1;
     lasd::SetLst<Data> &setLst2;
-    lasd::SetVec<Data> &stVec1;
-    lasd::SetVec<Data> &stVec2;
+    lasd::SetVec<Data> &setVec1;
+    lasd::SetVec<Data> &setVec2;
     lasd::SortableVector<Data> &sortableVector1;
     lasd::SortableVector<Data> &sortableVector2;
 
@@ -445,14 +445,14 @@ namespace myT
       *dynamic_cast<lasd::SortableVector<Data>*>(&sortableLinearSortVec2Container) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortableLinearSortVec2Container));
       *dynamic_cast<lasd::List<Data>*>(&list1) = std::move(dynamic_cast<lasd::List<Data>&>(other.list1));
       *dynamic_cast<lasd::List<Data>*>(&list2) = std::move(dynamic_cast<lasd::List<Data>&>(other.list2));
-      *dynamic_cast<lasd::SetVec<Data>*>(&setVec1) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.setVec1));
-      *dynamic_cast<lasd::SetVec<Data>*>(&setVec2) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.setVec2));
+      *dynamic_cast<lasd::SetVec<Data>*>(&setVec) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.setVec));
+      *dynamic_cast<lasd::SetLst<Data>*>(&setLst) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.setLst));
       *dynamic_cast<lasd::Vector<Data>*>(&vector1) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.vector1));
       *dynamic_cast<lasd::Vector<Data>*>(&vector2) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.vector2));
       *dynamic_cast<lasd::SetLst<Data>*>(&setLst1) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.setLst1));
       *dynamic_cast<lasd::SetLst<Data>*>(&setLst2) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.setLst2));
-      *dynamic_cast<lasd::SetVec<Data>*>(&stVec1) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.stVec1));
-      *dynamic_cast<lasd::SetVec<Data>*>(&stVec2) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.stVec2));
+      *dynamic_cast<lasd::SetVec<Data>*>(&setVec1) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.setVec1));
+      *dynamic_cast<lasd::SetVec<Data>*>(&setVec2) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.setVec2));
       *dynamic_cast<lasd::SortableVector<Data>*>(&sortableVector1) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortableVector1));
       *dynamic_cast<lasd::SortableVector<Data>*>(&sortableVector2) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortableVector2));
 
@@ -523,14 +523,14 @@ namespace myT
     sortableLinearSortVec2Container(*new lasd::SortableVector<Data>()),
     list1(*new lasd::List<Data>()),
     list2(*new lasd::List<Data>()),
-    setVec1(*new lasd::SetVec<Data>()),
-    setVec2(*new lasd::SetVec<Data>()),
+    setVec(*new lasd::SetVec<Data>()),
+    setLst(*new lasd::SetLst<Data>()),
     vector1(*new lasd::Vector<Data>()),
     vector2(*new lasd::Vector<Data>()),
     setLst1(*new lasd::SetLst<Data>()),
     setLst2(*new lasd::SetLst<Data>()),
-    stVec1(*new lasd::SetVec<Data>()),
-    stVec2(*new lasd::SetVec<Data>()),
+    setVec1(*new lasd::SetVec<Data>()),
+    setVec2(*new lasd::SetVec<Data>()),
     sortableVector1(*new lasd::SortableVector<Data>()),
     sortableVector2(*new lasd::SortableVector<Data>())
     {}
@@ -593,14 +593,14 @@ namespace myT
       lasd::SortableLinearContainer<Data> &&sortableLinearSortVec2Container,
       lasd::List<Data> &&list1,
       lasd::List<Data> &&list2,
-      lasd::Set<Data> &&setVec1,
-      lasd::Set<Data> &&setVec2,
+      lasd::Set<Data> &&setVec,
+      lasd::Set<Data> &&setLst,
       lasd::Vector<Data> &&vector1,
       lasd::Vector<Data> &&vector2,
       lasd::SetLst<Data> &&setLst1,
       lasd::SetLst<Data> &&setLst2,
-      lasd::SetVec<Data> &&stVec1,
-      lasd::SetVec<Data> &&stVec2,
+      lasd::SetVec<Data> &&setVec1,
+      lasd::SetVec<Data> &&setVec2,
       lasd::SortableVector<Data> &&sortableVector1,
       lasd::SortableVector<Data> &&sortableVector2
     )
@@ -662,14 +662,14 @@ namespace myT
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortableLinearSortVec2Container) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortableLinearSortVec2Container));
       *dynamic_cast<lasd::List<Data>*>(&this->list1) = std::move(dynamic_cast<lasd::List<Data>&>(list1));
       *dynamic_cast<lasd::List<Data>*>(&this->list2) = std::move(dynamic_cast<lasd::List<Data>&>(list2));
-      *dynamic_cast<lasd::SetVec<Data>*>(&this->setVec1) = std::move(dynamic_cast<lasd::SetVec<Data>&>(setVec1));
-      *dynamic_cast<lasd::SetVec<Data>*>(&this->setVec2) = std::move(dynamic_cast<lasd::SetVec<Data>&>(setVec2));
+      *dynamic_cast<lasd::SetVec<Data>*>(&this->setVec) = std::move(dynamic_cast<lasd::SetVec<Data>&>(setVec));
+      *dynamic_cast<lasd::SetLst<Data>*>(&this->setLst) = std::move(dynamic_cast<lasd::SetLst<Data>&>(setLst));
       *dynamic_cast<lasd::Vector<Data>*>(&this->vector1) = std::move(dynamic_cast<lasd::Vector<Data>&>(vector1));
       *dynamic_cast<lasd::Vector<Data>*>(&this->vector2) = std::move(dynamic_cast<lasd::Vector<Data>&>(vector2));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->setLst1) = std::move(dynamic_cast<lasd::SetLst<Data>&>(setLst1));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->setLst2) = std::move(dynamic_cast<lasd::SetLst<Data>&>(setLst2));
-      *dynamic_cast<lasd::SetVec<Data>*>(&this->stVec1) = std::move(dynamic_cast<lasd::SetVec<Data>&>(stVec1));
-      *dynamic_cast<lasd::SetVec<Data>*>(&this->stVec2) = std::move(dynamic_cast<lasd::SetVec<Data>&>(stVec2));
+      *dynamic_cast<lasd::SetVec<Data>*>(&this->setVec1) = std::move(dynamic_cast<lasd::SetVec<Data>&>(setVec1));
+      *dynamic_cast<lasd::SetVec<Data>*>(&this->setVec2) = std::move(dynamic_cast<lasd::SetVec<Data>&>(setVec2));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortableVector1) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortableVector1));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortableVector2) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortableVector2));
     }
@@ -732,14 +732,14 @@ namespace myT
       delete &sortableLinearSortVec2Container;
       delete &list1;
       delete &list2;
-      delete &setVec1;
-      delete &setVec2;
+      delete &setVec;
+      delete &setLst;
       delete &vector1;
       delete &vector2;
       delete &setLst1;
       delete &setLst2;
-      delete &stVec1;
-      delete &stVec2;
+      delete &setVec1;
+      delete &setVec2;
       delete &sortableVector1;
       delete &sortableVector2;
     }
@@ -865,11 +865,11 @@ namespace myT
   
   using DataT = MyType;
   
-  // template <typename Data>
-  // const time_t BoxRandomTester<Data>::seed = time(nullptr);
-  
   template <typename Data>
-  const time_t BoxRandomTester<Data>::seed = 1749211491;
+  const time_t BoxRandomTester<Data>::seed = time(nullptr);
+  
+  // template <typename Data>
+  // const time_t BoxRandomTester<Data>::seed = 1749211491;
   
   template <typename Data>
   void Gentest1(const lasd::Vector<Data> &Alphabet){
@@ -1060,7 +1060,7 @@ namespace myT
       if (std::cin.get() == '1'){
 
         std::cin.get();
-        std::cout << "\nMonoBoxes generated:" << std::endl;
+        std::cout << "\nMultiBoxes generated:" << std::endl;
 
         std::cout << "\tvectorContainer: " << std::endl;
         dynamic_cast<lasd::Vector<Data>&>(testBox.vectorContainer).Traverse(
@@ -1254,9 +1254,9 @@ void mytest()
 
   /* Prova */ {
 
-    using Box = lasd::Set<DataT>;
+    using Box = lasd::SetVec<DataT>;
 
-    globalBox<Box> = &boxTester.setLst1;
+    globalBox<Box> = &boxTester.setVec1;
 
     std::cout << globalBox<Box>->Size() << std::endl;
     std::cout << (globalBox<Box>->Empty() ? "true" : "false") << std::endl;

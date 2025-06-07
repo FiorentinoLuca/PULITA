@@ -175,9 +175,9 @@ void List<Data>::RemoveFromFront()
   if (Empty()) {
     throw std::length_error("List is empty");
   }
-  Node* toDelete = head;
+  Node* x = head;
   head = head->next;
-  delete toDelete;
+  delete x;
   size--;
   if (Empty()) {
     tail = nullptr;

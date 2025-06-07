@@ -117,19 +117,19 @@ public:
 
   void Clear() noexcept override; // Override ClearableContainer member
 
-  
+  bool Empty() const noexcept override; // Override ClearableContainer member
+
   ulong Size() const noexcept override;
   
   void Traverse(typename TraversableContainer<Data>::TraverseFun) const override;
 
-  using Container::Empty;
+  void PreOrderTraverse(typename TraversableContainer<Data>::TraverseFun) const override; // Override PreOrderTraversableContainer member
 
-  using Set<Data>::InsertAll;
-  using Set<Data>::RemoveAll;
-  using Set<Data>::InsertSome;
-  using Set<Data>::RemoveSome;
-  using Set<Data>::Front;
-  using Set<Data>::Back;
+  void PostOrderTraverse(typename TraversableContainer<Data>::TraverseFun) const override; // Override PostOrderTraversableContainer member
+
+  const Data& Front() const override;
+
+  const Data& Back() const override;
 
 protected:
 
@@ -149,8 +149,6 @@ protected:
 
   using Vector<Data>::mod;
   using Set<Data>::card;
-  using LinearContainer<Data>::operator==;
-  using LinearContainer<Data>::operator!=;
 
   friend class Set<Data>;
 

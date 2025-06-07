@@ -45,14 +45,14 @@ SetLst<Data>::SetLst(SetLst<Data> &&other) noexcept
 
 template <typename Data>
 SetLst<Data> &SetLst<Data>::operator=(const SetLst<Data>& other)
-{
+{ 
+  Clear();
   if (other.Empty())
   {
-    Clear();
     return *this;
   }
   head = other.Clone(tail);
-
+  size = other.size;
   return *this;
 }
 
@@ -133,7 +133,7 @@ inline Data SetLst<Data>::PredecessorNRemove(const Data& dat) {
   Node** pPred2Nxt = FindPred(dat);
   Data ret = std::move((*pPred2Nxt)->key);
 
-  Node *x = (*pPred2Nxt)->next;
+  Node *x = (*pPred2Nxt);
   if (x == head)
   {
     List<Data>::RemoveFromFront();
@@ -144,7 +144,7 @@ inline Data SetLst<Data>::PredecessorNRemove(const Data& dat) {
     return ret;
   }
 
-  (*pPred2Nxt)->next = (*pPred2Nxt)->next->next;
+  (*pPred2Nxt) = (*pPred2Nxt)->next;
   size--;
   delete x;
 
@@ -164,7 +164,7 @@ typename List<Data>::Node** SetLst<Data>::FindSucc(const Data &dat)
   if (Empty() || (ret != nullptr && *ret == tail))
     throw std::length_error("No successor found");
 
-  return ret;
+  return &(*ret)->next;
 }
 
 template <typename Data>
@@ -195,7 +195,7 @@ inline Data SetLst<Data>::SuccessorNRemove(const Data& dat) {
     List<Data>::RemoveFromBack();
     return ret;
   }
-  (*pSucc2Nxt)->next = (*pSucc2Nxt)->next->next;
+  (*pSucc2Nxt) = (*pSucc2Nxt)->next;
   delete x;
   size--;
   
