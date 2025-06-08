@@ -1,12 +1,12 @@
 
-#ifndef EX1BTEST_HPP
-#define EX1BTEST_HPP
+#ifndef EX2BTEST_HPP
+#define EX2BTEST_HPP
 
 /* ************************************************************************** */
 
-void testSimpleExercise1B(unsigned int &, unsigned int &);
+void testSimpleExercise2B(unsigned int &, unsigned int &);
 
-void testFullExercise1B(unsigned int &, unsigned int &);
+void testFullExercise2B(unsigned int &, unsigned int &);
 
 /* ************************************************************************** */
 

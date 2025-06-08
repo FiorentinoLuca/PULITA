@@ -239,7 +239,7 @@ void stestListInt(uint & testnum, uint & testerr) {
     lasd::List<int> movlst(move(lst));
     MapPreOrder(loctestnum, loctesterr, movlst, true, &MapIncrement<int>);
     FoldPreOrder(loctestnum, loctesterr, movlst, true, &FoldAdd<int>, 0, 14);
-    
+
     InsertAtFront(loctestnum, loctesterr, movlst, true, 6);
     InsertAtBack(loctestnum, loctesterr, movlst, true, 8);
     RemoveFromFront(loctestnum, loctesterr, movlst, true);

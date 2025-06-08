@@ -38,40 +38,22 @@ void stestSetInt(lasd::Set<int> & set, uint & testnum, uint & testerr) {
     Max(loctestnum, loctesterr, set, true, 6);
 
     RemoveMin(loctestnum, loctesterr, set, true);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-
     MinNRemove(loctestnum, loctesterr, set, true, 1);
 
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-
-
     InsertC(loctestnum, loctesterr, set, true, -1);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-
     InsertC(loctestnum, loctesterr, set, true, 1);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
 
     Min(loctestnum, loctesterr, set, true, -1);
     MaxNRemove(loctestnum, loctesterr, set, true, 6);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-
     Size(loctestnum, loctesterr, set, true, 6);
 
     InsertC(loctestnum, loctesterr, set, true, 7);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
 
     Size(loctestnum, loctesterr, set, true, 7);
 
     Max(loctestnum, loctesterr, set, true, 7);
 
     InsertC(loctestnum, loctesterr, set, true, 8);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
 
     Size(loctestnum, loctesterr, set, true, 8);
 
@@ -85,13 +67,8 @@ void stestSetInt(lasd::Set<int> & set, uint & testnum, uint & testerr) {
     TraversePostOrder(loctestnum, loctesterr, set, true, &TraversePrint<int>);
 
     Remove(loctestnum, loctesterr, set, false, 6);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-
     Remove(loctestnum, loctesterr, set, true, 2);
 
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-    
     TraversePreOrder(loctestnum, loctesterr, set, true, &TraversePrint<int>);
     TraversePostOrder(loctestnum, loctesterr, set, true, &TraversePrint<int>);
 
@@ -99,9 +76,6 @@ void stestSetInt(lasd::Set<int> & set, uint & testnum, uint & testerr) {
     Exists(loctestnum, loctesterr, set, false, 2);
 
     RemoveMax(loctestnum, loctesterr, set, true);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-
     Max(loctestnum, loctesterr, set, true, 7);
 
     TraversePreOrder(loctestnum, loctesterr, set, true, &TraversePrint<int>);
@@ -113,17 +87,11 @@ void stestSetInt(lasd::Set<int> & set, uint & testnum, uint & testerr) {
     Successor(loctestnum, loctesterr, set, true, 4, 5);
 
     SuccessorNRemove(loctestnum, loctesterr, set, true, 0, 1);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-
     Min(loctestnum, loctesterr, set, true, -1);
 
     TraversePreOrder(loctestnum, loctesterr, set, true, &TraversePrint<int>);
 
     PredecessorNRemove(loctestnum, loctesterr, set, true, 7, 5);
-
-    set.Traverse(&TraversePrint<int>); std::cout << std::endl;
-
     Max(loctestnum, loctesterr, set, true, 7);
 
     TraversePostOrder(loctestnum, loctesterr, set, true, &TraversePrint<int>);
