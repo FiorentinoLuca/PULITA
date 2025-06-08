@@ -173,7 +173,7 @@ void Vector<Data>::Clear()
 template <typename Data>
 inline void Vector<Data>::EnsureCapacity(ulong dim)
 {
-  if (size != dim)
+  if (Size() != dim)
     *this = Vector(dim);
 }
 

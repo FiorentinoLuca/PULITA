@@ -25,7 +25,7 @@ private:
 protected:
 
   using Container::size;
-  ulong heapSize;
+  ulong heapSize = 0;
   static const ulong initialSize;
 
   // ...
@@ -77,6 +77,20 @@ public:
   void Change(ulong, const Data&) override; // Override PQ member (Copy of the value)
   void Change(ulong, Data&&) override; // Override PQ member (Move of the value)
 
+  bool operator==(const PQHeap<Data>&) const noexcept;
+  bool operator!=(const PQHeap<Data>&) const noexcept;
+
+  void Clear() noexcept override; // Override ClearableContainer member
+
+  ulong Size() const noexcept override;
+
+  using LinearContainer<Data>::Front;
+  using HeapVec<Data>::HeapifyDown;
+  using HeapVec<Data>::Traverse;
+  using HeapVec<Data>::PreOrderTraverse;
+  using HeapVec<Data>::PostOrderTraverse;
+  using HeapVec<Data>::Empty;
+
 protected:
 
   // Auxiliary functions, if necessary!
@@ -84,8 +98,11 @@ protected:
   void HeapifyUp(ulong) noexcept;
   void Resize(ulong) override;
   void EnsureCapacity(ulong) override;
-  void Transfer(PQHeap<Data> &receiver, ulong srcStart, int grouping, ulong dstStart);
 
+  using HeapVec<Data>::GetMax;
+  using HeapVec<Data>::parent;
+  using HeapVec<Data>::left;
+  using HeapVec<Data>::right;
 
 };
 

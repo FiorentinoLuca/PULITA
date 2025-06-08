@@ -157,6 +157,8 @@ public:
 
   using LinearContainer<Data>::Traverse;
 
+  using Container::Size;
+
 };
 
 template <typename Data>
@@ -193,6 +195,8 @@ public:
 
   virtual
   void Sort() noexcept;
+
+  using Container::Size;
 
 protected:
 

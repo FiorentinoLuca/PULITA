@@ -12,7 +12,7 @@ inline bool LinearContainer<Data>::operator==(const LinearContainer<Data>& other
     if (Size() != other.Size())
                              return false;
     bool diffAbsence = true;
-    for (ulong i = 0; diffAbsence && i < size && i < other.size; i++)
+    for (ulong i = 0; diffAbsence && i < Size() && i < other.Size(); i++)
     {
       diffAbsence = (other[i] == operator[](i))?(diffAbsence):(false);
     }
@@ -34,7 +34,7 @@ inline const Data &LinearContainer<Data>::Front()
 template <typename Data>
 inline const Data &LinearContainer<Data>::Back()
   const {
-    return operator[](size - 1);
+    return operator[](Size() - 1);
 }
 
 template <typename Data>
@@ -58,7 +58,7 @@ inline void LinearContainer<Data>::PreOrderTraverse(TraverseFun f)
     if (Container::Empty())
                     return;
 
-    for (ulong i = 0; i < size; i++)
+    for (ulong i = 0; i < Size(); i++)
     {
       f(operator[](i));
     }
@@ -70,7 +70,7 @@ inline void LinearContainer<Data>::PostOrderTraverse(TraverseFun f)
     if (Container::Empty())
                     return;
 
-    for (ulong i = size; i != 0; i--){
+    for (ulong i = Size(); i != 0; i--){
       f((operator[])(i-1));
     }
 }
@@ -99,7 +99,7 @@ template <typename Data>
 inline const Data& MutableLinearContainer<Data>::Back()
   const {
     return (*static_cast<const MutableLinearContainer<Data>*>(this))
-                                                .operator[](size-1);
+                                                .operator[](Size()-1);
 }
 
 template <typename Data>
@@ -111,7 +111,7 @@ inline Data& MutableLinearContainer<Data>::Front()
 template <typename Data>
 inline Data& MutableLinearContainer<Data>::Back()
 {
-  return (*this).operator[](size-1);
+  return (*this).operator[](Size()-1);
 }
 
 template <typename Data>
@@ -132,7 +132,7 @@ inline void MutableLinearContainer<Data>::Map(MapFun f)
 template<typename Data>
 inline void MutableLinearContainer<Data>::PreOrderMap(MapFun f)
 {
-  for (ulong i = 0; i < size; ++i)
+  for (ulong i = 0; i < Size(); ++i)
   {
       f((*this)[i]);
   }
@@ -141,7 +141,7 @@ inline void MutableLinearContainer<Data>::PreOrderMap(MapFun f)
 template<typename Data>
 inline void MutableLinearContainer<Data>::PostOrderMap(MapFun f)
 {
-  for (ulong i = size; i != 0; i--){
+  for (ulong i = Size(); i != 0; i--){
     f((operator[])(i-1));
   }
 }
@@ -159,7 +159,7 @@ void SortableLinearContainer<Data>::InsertionSort()
   noexcept {
     Data x;
     ulong i;
-    for (ulong j = 1; j < size; j++)
+    for (ulong j = 1; j < Size(); j++)
     {
         x = (*this)[j];
         i = j;

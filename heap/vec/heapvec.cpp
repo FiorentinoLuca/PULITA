@@ -7,23 +7,23 @@ namespace lasd {
 
 template <typename Data>
 HeapVec<Data>::HeapVec(const TraversableContainer<Data>& box) 
-  : Vector<Data>(box), SortableVector<Data>(box) {
+  : Vector<Data>(box) {
   Heapify();
 }
 
 template <typename Data>
 HeapVec<Data>::HeapVec(MappableContainer<Data>&& box) 
-  : Vector<Data>(box), SortableVector<Data>(std::move(box)) {
+  : Vector<Data>(std::move(box)) {
   Heapify();
 }
 
 template <typename Data>
 HeapVec<Data>::HeapVec(const HeapVec& other) 
-  : Vector<Data>(other), SortableVector<Data>(other) {}
+  : Vector<Data>(other) {}
 
 template <typename Data>
 HeapVec<Data>::HeapVec(HeapVec&& other) noexcept 
-  : Vector<Data>(std::move(other)), SortableVector<Data>(std::move(other)) {}
+  : Vector<Data>(std::move(other)) {}
 
 template <typename Data>
 HeapVec<Data>& HeapVec<Data>::operator=(const HeapVec<Data>& other) {
@@ -63,8 +63,8 @@ inline bool HeapVec<Data>::IsHeap() const noexcept {
 template <typename Data>
 void HeapVec<Data>::Heapify() noexcept {
   if (Size() == 0) return;
-  for (long i = parent(Size() - 1); i >= 0; --i) {
-    HeapifyDown(i, Size() - 1);
+  for (ulong i = parent(Size()-1)+1; i > 0; --i) {
+    HeapifyDown(i-1, Size()-1);
   }
 }
 
@@ -143,6 +143,47 @@ void HeapVec<Data>::PostOrderTraverse(typename TraversableContainer<Data>::Trave
     {
         f((*this)[i-1]);
     }
+}
+
+template <typename Data>
+const Data& HeapVec<Data>::Back() const {
+  if (Size() == 0) {
+    throw std::length_error("Heap is empty");
+  }
+  return (*this)[Size() - 1];
+}
+
+template <typename Data>
+const Data& HeapVec<Data>::Front() const {
+  if (Size() == 0) {
+    throw std::length_error("Heap is empty");
+  }
+  return (*this)[0];
+}
+
+template <typename Data>
+const Data& HeapVec<Data>::operator[](ulong index)
+  const {
+  if (index >= Size()) {
+    throw std::out_of_range("Index out of range");
+  }
+  return this->buffer[index];
+}
+
+template <typename Data>
+Data& HeapVec<Data>::Back() {
+  return const_cast<Data&>(static_cast<const HeapVec<Data>&>(*this).Back());
+}
+
+template <typename Data>
+Data& HeapVec<Data>::Front() {
+  return const_cast<Data&>(static_cast<const HeapVec<Data>&>(*this).Front());
+}
+
+template <typename Data>
+Data& HeapVec<Data>::operator[](ulong index)
+{
+  return const_cast<Data&>(static_cast<const HeapVec<Data>&>(*this)[index]);
 }
 
 

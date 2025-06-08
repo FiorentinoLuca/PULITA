@@ -13,7 +13,7 @@ namespace lasd {
 /* ************************************************************************** */
 
 template <typename Data>
-class PQ : public LinearContainer<Data>, public ClearableContainer { 
+class PQ : virtual public LinearContainer<Data>, virtual public ClearableContainer { 
   // Must extend LinearContainer<Data>,
   //             ClearableContainer
 
@@ -46,10 +46,14 @@ public:
   virtual
   Data TipNRemove() = 0; // (concrete function must throw std::length_error when empty)
 
+  virtual
   void Insert(const Data&) = 0; // Copy of the value
+  virtual
   void Insert(Data&&) = 0; // Move of the value
 
+  virtual
   void Change(ulong, const Data&) = 0; // Copy of the value
+  virtual
   void Change(ulong, Data&&) = 0; // Move of the value
 
 };

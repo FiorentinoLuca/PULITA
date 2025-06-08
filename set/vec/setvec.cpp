@@ -353,6 +353,11 @@ void SetVec<Data>::EnsureCapacity(ulong dim)
   float resizingFactor = 1.5;
   
   if (size < dim) { // | | | | | -> | | | | | | | 
+    
+    if (Empty()) {
+      Resize(initialSize);
+      return;
+    }
     Resize(static_cast<ulong>(resizingFactor*size));
     return;
   }

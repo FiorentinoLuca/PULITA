@@ -1214,7 +1214,6 @@ namespace myT
 
 } // namespace myT
 
-
 using namespace myT;
 
 template <typename Box>
@@ -1222,7 +1221,6 @@ Box *globalBox;
 
 void mytest()
 {
-  
   // ...
   
   srand(BoxRandomTester<DataT>::seed);

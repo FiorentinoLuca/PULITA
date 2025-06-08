@@ -14,8 +14,7 @@ namespace lasd {
 /* ************************************************************************** */
 
 template <typename Data>
-class HeapVec : virtual public Heap<Data>,
-  virtual protected SortableVector<Data> {
+class HeapVec : virtual public Heap<Data>, virtual protected SortableVector<Data> {
   // Must extend Heap<Data>,
   // Could extend SortableVector<Data>
 
@@ -87,6 +86,10 @@ public:
   void PreOrderTraverse(typename TraversableContainer<Data>::TraverseFun) const override; // Override TraversableContainer member
   void PostOrderTraverse(typename TraversableContainer<Data>::TraverseFun) const override; // Override TraversableContainer member
 
+  const Data& Front() const override;
+  const Data& Back() const override;
+  const Data& operator[](ulong index) const override;
+
 protected:
 
   // Auxiliary functions, if necessary!
@@ -97,6 +100,10 @@ protected:
   static int parent(ulong) noexcept;
   static ulong left(ulong) noexcept;
   static ulong right(ulong) noexcept;
+
+  Data& Front() override;
+  Data& Back() override;
+  Data& operator[](ulong index) override;
 
 };
 
