@@ -39,11 +39,11 @@ void lasdtest() {
   cout << endl << "Exercise 1 (Simple Test) (Errors/Tests: " << stesterr << "/" << stestnum << ")";
   cout << endl << "Exercise 1 (Full Test) (Errors/Tests: " << ftesterr << "/" << ftestnum << ")" << endl;
 
-  // stestnum = 0; stesterr = 0; ftestnum = 0; ftesterr = 0;
+  stestnum = 0; stesterr = 0; ftestnum = 0; ftesterr = 0;
 
-  // loctestnum = 0; loctesterr = 0;
-  // testSimpleExercise2A(loctestnum, loctesterr);
-  // stestnum += loctestnum; stesterr += loctesterr;
+  loctestnum = 0; loctesterr = 0;
+  testSimpleExercise2A(loctestnum, loctesterr);
+  stestnum += loctestnum; stesterr += loctesterr;
 
   // loctestnum = 0; loctesterr = 0;
   // testSimpleExercise2B(loctestnum, loctesterr);
