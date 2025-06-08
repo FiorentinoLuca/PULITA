@@ -50,6 +50,9 @@ SetVec<Data>::SetVec(SetVec<Data>&& other)
 template <typename Data>
 SetVec<Data>& SetVec<Data>::operator=(const SetVec<Data>& other)
 {
+
+  if (this == &other) return *this;
+
   SetVec<Data>&& tmp = SetVec(other);
   std::swap(tmp, *this);
 
@@ -354,24 +357,18 @@ void SetVec<Data>::EnsureCapacity(ulong dim)
     return;
   }
 
-  // if (size < initialSize)
-  // {
-  //   Resize(initialSize);
-  //   return;
-  // }
+  if (numElements < std::ceil(resizingFactor))
+                                       return;
 
-  if (numElements < initialSize)
-                         return;
-
-  ulong lowExp = std::floor(std::log(numElements)/std::log(resizingFactor));
-
-  if (numElements<=std::pow(resizingFactor,lowExp-1) && numElements<=dim) // |x|x|x|x| | | | | | -> |x|x|x|x| | |
-                              Resize(static_cast<ulong>(size/resizingFactor));
+  // |x|x|x|x| | | | | | -> |x|x|x|x| | |
+  if (size > static_cast<ulong>(numElements*resizingFactor*resizingFactor))          
+     Resize(static_cast<ulong>(numElements*resizingFactor));
 }
 
 template <typename Data>
 void SetVec<Data>::Resize(ulong newSize)
 {
+
   if (newSize == 0) {
     this->Vector<Data>::Clear();
   }
@@ -389,28 +386,29 @@ template <typename Data>
 void SetVec<Data>::Transfer(SetVec<Data> &receiver, ulong srcStart, int grouping, ulong dstStart)
 {
 
-  if (std::abs(grouping) > std::min(numElements, receiver.numElements))
-                     throw std::invalid_argument("non valid grouping");
+  // if (std::abs(grouping) > std::min(numElements, receiver.numElements))
+  //                    throw std::invalid_argument("non valid grouping");
 
-  if (Set<Data>::card(dstStart, dstStart + std::abs(grouping)-1)<=receiver.size 
-    && Set<Data>::card(srcStart, srcStart + std::abs(grouping)-1)<=size) {
+  // if (Set<Data>::card(dstStart, dstStart + std::abs(grouping)-1)<=receiver.size 
+  //   && Set<Data>::card(srcStart, srcStart + std::abs(grouping)-1)<=size) {
     
-    int sign = (grouping < 0) ? -1 : 1;
+  //   int sign = (grouping < 0) ? -1 : 1;
 
-    ulong srcIndex, dstIndex;
-    for (int i = grouping; std::abs(i) > 0; i=sign*(std::abs(i)-1)) {
+  //   ulong srcIndex, dstIndex;
+  //   for (int i = grouping; std::abs(i) > 0; i=sign*(std::abs(i)-1)) {
 
-      srcIndex=mod(srcStart+i-sign, numElements);
-      dstIndex=mod(dstStart+i-sign, receiver.numElements);
+  //     srcIndex=mod(srcStart+i-sign, numElements);
+  //     dstIndex=mod(dstStart+i-sign, receiver.numElements);
 
-      receiver.buffer[mod(dstIndex+receiver.head, receiver.size)] = std::move((*this).buffer[mod(srcIndex+head, size)]);
-    }
+  //     receiver.buffer[mod(dstIndex+receiver.head, receiver.size)] = std::move((*this).buffer[mod(srcIndex+head, size)]);
+  //   }
 
-  } else {
-    throw std::length_error("Index bigger than last element's index");
-  }
+  // } else {
+  //   throw std::length_error("Index bigger than last element's index");
+  // }
+
+  this->Vector<Data>::Transfer(receiver, srcStart, grouping, dstStart);
 }
-
 
 template <typename Data>
 inline bool SetVec<Data>::isLefter(int idx)

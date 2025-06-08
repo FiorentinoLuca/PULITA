@@ -99,6 +99,9 @@ List<Data>::~List()
 template <typename Data>
 List<Data>& List<Data>::operator=(const List<Data>& other)
 {
+
+  if (this == &other) return *this;
+
   Clear();
   if (!other.Empty()) {
     head = other.Clone(tail);

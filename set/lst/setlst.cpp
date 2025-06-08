@@ -46,6 +46,9 @@ SetLst<Data>::SetLst(SetLst<Data> &&other) noexcept
 template <typename Data>
 SetLst<Data> &SetLst<Data>::operator=(const SetLst<Data>& other)
 { 
+
+  if (this == &other) return *this;
+
   Clear();
   if (other.Empty())
   {

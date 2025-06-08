@@ -6,8 +6,9 @@ namespace lasd {
 // ...
 
 template <typename Data>
-inline bool DictionaryContainer<Data>::InsertAll(const TraversableContainer<Data> &box)
+bool DictionaryContainer<Data>::InsertAll(const TraversableContainer<Data> &box)
 {
+
   bool check = true;
   box.Traverse(
     [this, &check](const Data &dat)
@@ -19,7 +20,7 @@ inline bool DictionaryContainer<Data>::InsertAll(const TraversableContainer<Data
 }
 
 template <typename Data>
-inline bool DictionaryContainer<Data>::InsertAll(MappableContainer<Data> &&box)
+bool DictionaryContainer<Data>::InsertAll(MappableContainer<Data> &&box)
 {
   bool check = true;
   box.Map(
@@ -32,8 +33,9 @@ inline bool DictionaryContainer<Data>::InsertAll(MappableContainer<Data> &&box)
 }
 
 template <typename Data>
-inline bool DictionaryContainer<Data>::RemoveAll(const TraversableContainer<Data> &box)
+bool DictionaryContainer<Data>::RemoveAll(const TraversableContainer<Data> &box)
 {
+
   bool check = true;
   box.Traverse(
     [this, &check](const Data &dat)
@@ -45,7 +47,7 @@ inline bool DictionaryContainer<Data>::RemoveAll(const TraversableContainer<Data
 }
 
 template <typename Data>
-inline bool DictionaryContainer<Data>::InsertSome(const TraversableContainer<Data> &box)
+bool DictionaryContainer<Data>::InsertSome(const TraversableContainer<Data> &box)
 {
   bool check = false;
   box.Traverse(
@@ -58,7 +60,7 @@ inline bool DictionaryContainer<Data>::InsertSome(const TraversableContainer<Dat
 }
 
 template <typename Data>
-inline bool DictionaryContainer<Data>::InsertSome(MappableContainer<Data> &&box)
+bool DictionaryContainer<Data>::InsertSome(MappableContainer<Data> &&box)
 {
   bool check = false;
   box.Map(
@@ -71,7 +73,7 @@ inline bool DictionaryContainer<Data>::InsertSome(MappableContainer<Data> &&box)
 }
 
 template <typename Data>
-inline bool DictionaryContainer<Data>::RemoveSome(const TraversableContainer<Data> &box)
+bool DictionaryContainer<Data>::RemoveSome(const TraversableContainer<Data> &box)
 {
   bool check = false;
   box.Traverse(

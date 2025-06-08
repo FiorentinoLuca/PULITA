@@ -42,6 +42,77 @@ public:
   // Move assignment
   Set<Data>& operator=(Set<Data>&&) = delete; // Move assignment of abstract types is not possible.
 
+
+  bool InsertAll(const TraversableContainer<Data> &box) override
+  {
+
+    if (this == &box)
+        return false;
+
+    bool check = true;
+    box.Traverse(
+      [this, &check](const Data &dat)
+      {
+        check = (this->Insert(dat) && check);
+      }
+    );
+    return check;
+  }
+
+  bool RemoveAll(const TraversableContainer<Data> &box) override
+  {
+
+    if (this == &box)
+    {
+      Clear();
+      return true;
+    }
+
+    bool check = true;
+    box.Traverse(
+      [this, &check](const Data &dat)
+      {
+        check = (this->Remove(dat) && check);
+      }
+    );
+    return check;
+  }
+
+  bool InsertSome(const TraversableContainer<Data> &box) override
+  {
+
+    if (this == &box)
+        return false;
+
+    bool check = false;
+    box.Traverse(
+      [this, &check](const Data &dat)
+      {
+          check = (this->Insert(dat) || check);
+      }
+    );
+    return check;
+  }
+
+  bool RemoveSome(const TraversableContainer<Data> &box) override
+  {
+
+    if (this == &box)
+    {
+      Clear();
+      return true;
+    }
+
+    bool check = false;
+    box.Traverse(
+      [this, &check](const Data &dat)
+      {
+          check = (this->Remove(dat) || check);
+      }
+    );
+    return check;
+  }
+
 protected:
   // Specific member functions
 

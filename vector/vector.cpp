@@ -68,6 +68,8 @@ Vector<Data>::~Vector()
 template <typename Data>
 inline Vector<Data>& Vector<Data>::operator=(const Vector<Data>& other)
 {
+  if (this == &other) return *this;
+
   EnsureCapacity(other.size);
   int i = 0;
   other.Traverse(
@@ -183,26 +185,20 @@ inline ulong Vector<Data>::mod(int x, int m) {
 template <typename Data>
 inline void Vector<Data>::Transfer(Vector<Data> &receiver, ulong srcStart, int grouping, ulong dstStart)
 {
-  if (std::abs(grouping) > std::min(size, receiver.size))
+  if (std::abs(grouping) > std::min(Size(), receiver.Size()))
     throw std::invalid_argument("non valid grouping");
-
-  if (std::abs(grouping)<=receiver.size 
-    && std::abs(grouping)<=size) {
     
-    int sign = (grouping < 0) ? -1 : 1;
+  int sign = (grouping < 0) ? -1 : 1;
 
-    ulong srcIndex, dstIndex;
-    for (int i = grouping; std::abs(i) > 0; i=sign*(std::abs(i)-1)) {
+  ulong srcIndex, dstIndex;
+  for (int i = grouping; std::abs(i) > 0; i=sign*(std::abs(i)-1)) {
 
-      srcIndex=mod(srcStart+i-sign, size);
-      dstIndex=mod(dstStart+i-sign, receiver.size);
+    srcIndex=mod(srcStart+i-sign, Size());
+    dstIndex=mod(dstStart+i-sign, receiver.Size());
 
-      receiver.buffer[dstIndex] = std::move((*this).buffer[srcIndex]);
-    }
-
-  } else {
-    throw std::length_error("Index bigger than last element's index");
+    receiver[dstIndex] = std::move((*this)[srcIndex]);
   }
+
 }
 
 /* ***************************SortableVector********************************* */
