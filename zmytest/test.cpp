@@ -14,6 +14,8 @@
 #include "../set/vec/setvec.hpp"
 #include "../list/list.hpp"
 #include "../set/lst/setlst.hpp"
+#include "../heap/vec/heapvec.hpp"      // <-- HeapVec
+#include "../pq/heap/pqheap.hpp"        // <-- PQHeap
 
 /* ************************************************************************** */
 
@@ -65,67 +67,255 @@ namespace myT
   }
 
   template <typename Data>
-  void TraversablesTest(lasd::TraversableContainer<Data> &box, Data init)
+  void DictionariesTest(lasd::DictionaryContainer<Data>& box, const Data& dat, const lasd::TraversableContainer<Data>& toInsert)
   {
-    std::cout << "----------------------------------------TraversablesTest: ";
+    std::cout << "----------------------------------------DictionariesTest: ";
     std::cout << typeid(box).name();
     std::cout << "----------------------------------------" << std::endl;
-    std::cout << "Begin traversing through the box: " << std::endl;
-    box.Traverse(
-        [](const Data &dat)
-        {
-          std::cout << dat << ", " << std::endl;
-        });
-    std::cout << "End traversing through the box" << std::endl;
 
-    std::cout << "Fold of the box begining with: " << init << std::endl;
-    std::cout << box.Fold(
-                     [](const Data &dat, const Data &acc)
-                     {
-                       return acc + dat;
-                     },
-                     init)
-              << std::endl;
+    std::cout << "box.Insert(" << dat << ") == " << (box.Insert(dat) ? "true" : "false") << std::endl;
+    std::cout << "box.Remove(" << dat << ") == " << (box.Remove(dat) ? "true" : "false") << std::endl;
+
+    std::cout << "box.InsertAll(toInsert) == " << (box.InsertAll(toInsert) ? "true" : "false") << std::endl;
+    std::cout << "box.RemoveAll(toInsert) == " << (box.RemoveAll(toInsert) ? "true" : "false") << std::endl;
+    std::cout << "box.InsertSome(toInsert) == " << (box.InsertSome(toInsert) ? "true" : "false") << std::endl;
+    std::cout << "box.RemoveSome(toInsert) == " << (box.RemoveSome(toInsert) ? "true" : "false") << std::endl;
   }
 
   template <typename Data>
-  void PreOrderTraversablesTest(lasd::PreOrderTraversableContainer<Data> &box, Data init)
+  void TraversablesTest(lasd::TraversableContainer<Data> &box,
+    std::function<void(const Data &)> visitfun,
+    std::function<Data(const Data &, const Data &)> foldfun,
+    Data init) {
+      
+      std::cout << "----------------------------------------TraversablesTest: ";
+      std::cout << typeid(box).name();
+      std::cout << "----------------------------------------" << std::endl;
+
+      std::cout << "Begin traversing through the box: " << std::endl;
+      box.Traverse(visitfun);
+      std::cout << "End traversing through the box" << std::endl;
+
+      std::cout << "Fold of the box begining with: " << init << std::endl;
+      std::cout << box.Fold(foldfun, init) << std::endl;
+  }
+  
+  template <typename Data>
+  void OrderedDictionariesTest(lasd::OrderedDictionaryContainer<Data>& box, const Data& dat)
   {
-    std::cout << "----------------------------------------PreOrderTraversablesTest: ";
+    std::cout << "----------------------------------------OrderedDictionariesTest: ";
     std::cout << typeid(box).name();
     std::cout << "----------------------------------------" << std::endl;
-    std::cout << "Begin traversing through the box: " << std::endl;
-    box.Traverse(
-        [](const Data &dat)
-        {
-          std::cout << dat << ", " << std::endl;
-        });
 
-    std::cout << "Begin traversing(PREORDER) through the box: " << std::endl;
-    box.PreOrderTraverse(
-        [](const Data &dat)
-        {
-          std::cout << dat << ", " << std::endl;
-        });
-    std::cout << "End traversing through the box" << std::endl;
-    std::cout << "Fold of the box begining with: " << init << std::endl;
-    std::cout << box.Fold(
-      [](const Data &dat, const Data &acc)
-      {
-        return acc + dat;
-      },
-      init)
-    << std::endl;
+    try { std::cout << "box.Min() == " << box.Min() << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.Min() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "box.MinNRemove() == " << box.MinNRemove() << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.MinNRemove() exception: " << e.what() << std::endl; }
+
+    try { box.RemoveMin(); std::cout << "box.RemoveMin() OK" << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.RemoveMin() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "box.Max() == " << box.Max() << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.Max() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "box.MaxNRemove() == " << box.MaxNRemove() << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.MaxNRemove() exception: " << e.what() << std::endl; }
+
+    try { box.RemoveMax(); std::cout << "box.RemoveMax() OK" << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.RemoveMax() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "box.Predecessor(" << dat << ") == " << box.Predecessor(dat) << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.Predecessor() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "box.PredecessorNRemove(" << dat << ") == " << box.PredecessorNRemove(dat) << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.PredecessorNRemove() exception: " << e.what() << std::endl; }
+
+    try { box.RemovePredecessor(dat); std::cout << "box.RemovePredecessor() OK" << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.RemovePredecessor() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "box.Successor(" << dat << ") == " << box.Successor(dat) << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.Successor() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "box.SuccessorNRemove(" << dat << ") == " << box.SuccessorNRemove(dat) << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.SuccessorNRemove() exception: " << e.what() << std::endl; }
+
+    try { box.RemoveSuccessor(dat); std::cout << "box.RemoveSuccessor() OK" << std::endl; }
+    catch (const std::length_error& e) { std::cout << "box.RemoveSuccessor() exception: " << e.what() << std::endl; }
+  }
+
+  template <typename Data>
+  void MappablesTest(lasd::MappableContainer<Data>& box, std::function<void(Data&)> mapfun)
+  {
+    std::cout << "----------------------------------------MappablesTest: ";
+    std::cout << typeid(box).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Before Map:" << std::endl;
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    box.Map(mapfun);
+
+    std::cout << "After Map:" << std::endl;
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+  }
+
+  template <typename Data>
+  void PreOrderTraversablesTest(
+    lasd::PreOrderTraversableContainer<Data> &box,
+    std::function<void(const Data &)> visitfun,
+    std::function<Data(const Data &, const Data &)> foldfun,
+    Data init) {
+      std::cout << "----------------------------------------PreOrderTraversablesTest: ";
+      std::cout << typeid(box).name();
+      std::cout << "----------------------------------------" << std::endl;
+
+      std::cout << "Begin traversing through the box: " << std::endl;
+      box.Traverse(visitfun);
+
+      std::cout << "Begin traversing(PREORDER) through the box: " << std::endl;
+      box.PreOrderTraverse(visitfun);
+      std::cout << "End traversing through the box" << std::endl;
+
+      std::cout << "Fold of the box begining with: " << init << std::endl;
+      std::cout << box.Fold(foldfun, init) << std::endl;
+  }
+  
+  template <typename Data>
+  void PostOrderTraversablesTest(
+    lasd::PostOrderTraversableContainer<Data> &box,
+    std::function<void(const Data &)> visitfun,
+    std::function<Data(const Data &, const Data &)> foldfun,
+    Data init) {
+
+      std::cout << "----------------------------------------PostOrderTraversablesTest: ";
+      std::cout << typeid(box).name();
+      std::cout << "----------------------------------------" << std::endl;
+
+      std::cout << "Begin traversing through the box: " << std::endl;
+      box.Traverse(visitfun);
+
+      std::cout << "Begin traversing(POSTORDER) through the box: " << std::endl;
+      box.PostOrderTraverse(visitfun);
+      std::cout << "End traversing through the box" << std::endl;
+
+      std::cout << "Fold of the box begining with: " << init << std::endl;
+      std::cout << box.Fold(foldfun, init) << std::endl;
+  }
+
+  template <typename Data>
+  void PreOrderMappablesTest(lasd::PreOrderMappableContainer<Data>& box, std::function<void(Data&)> mapfun)
+  {
+    std::cout << "----------------------------------------PreOrderMappablesTest: ";
+    std::cout << typeid(box).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Before PreOrderMap:" << std::endl;
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    box.PreOrderMap(mapfun);
+
+    std::cout << "After PreOrderMap:" << std::endl;
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+  }
+
+  template <typename Data>
+  void PostOrderMappablesTest(lasd::PostOrderMappableContainer<Data>& box, std::function<void(Data&)> mapfun)
+  {
+    std::cout << "----------------------------------------PostOrderMappablesTest: ";
+    std::cout << typeid(box).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Before PostOrderMap:" << std::endl;
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    box.PostOrderMap(mapfun);
+
+    std::cout << "After PostOrderMap:" << std::endl;
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+  }
+
+  template <typename Data>
+  void LinearsTest(lasd::LinearContainer<Data>& box, lasd::LinearContainer<Data>& other, ulong idx)
+  {
+    std::cout << "----------------------------------------LinearsTest: ";
+    std::cout << typeid(box).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Contents of box: ";
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    std::cout << "Contents of other: ";
+    other.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    try { std::cout << "Front: " << box.Front() << std::endl; }
+    catch (const std::length_error& e) { std::cout << "Front() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "Back: " << box.Back() << std::endl; }
+    catch (const std::length_error& e) { std::cout << "Back() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "operator[](" << idx << ") == " << box[idx] << std::endl; }
+    catch (const std::out_of_range& e) { std::cout << "operator[] exception: " << e.what() << std::endl; }
+
+    std::cout << "operator== (other): " << ((box == other) ? "true" : "false") << std::endl;
+    std::cout << "operator!= (other): " << ((box != other) ? "true" : "false") << std::endl;
+  }
+
+  template <typename Data>
+  void MutableLinearsTest(lasd::MutableLinearContainer<Data>& box, const Data& f, const Data& b, ulong idx, const Data& dat)
+  {
+    std::cout << "----------------------------------------MutableLinearsTest: ";
+    std::cout << typeid(box).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Before: ";
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    try { std::cout << "Front() = " << box.Front()=f << std::endl; }
+    catch (const std::length_error& e) { std::cout << "Front() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "Back() = " << box.Back()=b << std::endl; }
+    catch (const std::length_error& e) { std::cout << "Back() exception: " << e.what() << std::endl; }
+
+    try { std::cout << "operator[](" << idx << ") = " << box[idx]=dat << std::endl; }
+    catch (const std::out_of_range& e) { std::cout << "operator[] exception: " << e.what() << std::endl; }
+
+    std::cout << "After: ";
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+  }
+
+  template <typename Data>
+  void SortableLinearsTest(lasd::SortableLinearContainer<Data>& box, ulong idx)
+  {
+    std::cout << "----------------------------------------SortableLinearsTest: ";
+    std::cout << typeid(box).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Before Sort: ";
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    box.Sort();
+
+    std::cout << "After Sort: ";
+    box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
   }
 
   template <typename Data>
   class BoxRandomTester;
-
-  template <typename Data>
-  BoxRandomTester<Data> EmptyBoxes()
-  {
-    return BoxRandomTester<Data>();
-  }
 
   template <typename Data>
   lasd::Vector<Data> getRandomTraversableContainer(const lasd::Vector<Data> &Alphabet, ulong min, ulong max)
@@ -163,14 +353,23 @@ namespace myT
   }
 
   template <typename Data>
+  BoxRandomTester<Data> EmptyBoxes()
+  {
+    return BoxRandomTester<Data>();
+  }
+
+  template <typename Data>
   BoxRandomTester<Data> MonoBoxes(const lasd::Vector<Data> &Alphabet) {
     BoxRandomTester<Data> testBox(
+      
       // --- Container ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // vectorContainer
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),           // listContainer
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // setVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // setLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // sortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // pqHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // heapVecContainer
 
       // --- Testable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // testableVectorContainer
@@ -178,12 +377,16 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // testableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // testableSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // testableSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // testablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // testableHeapVecContainer
 
       // --- Clearable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // clearableVectorContainer
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),           // clearableListContainer
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // clearableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // clearableSetLstContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // clearablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // clearableHeapVecContainer
 
       // --- Resizable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // resizableVectorContainer
@@ -199,6 +402,8 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // traversableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // traversableSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // traversableSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // traversablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // traversableHeapVecContainer
 
       // --- OrderedDictionary ---
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // orderedDictionarySetVecContainer
@@ -215,6 +420,8 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // preOrderTraversableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // preOrderTraversableSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // preOrderTraversableSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // preOrderTraversablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // preOrderTraversableHeapVecContainer
 
       // --- PostOrderTraversable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // postOrderTraversableVectorContainer
@@ -222,6 +429,8 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // postOrderTraversableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // postOrderTraversableSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // postOrderTraversableSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // postOrderTraversablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // postOrderTraversableHeapVecContainer
 
       // --- PreOrderMappable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // preOrderMappableVectorContainer
@@ -239,21 +448,34 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // linearSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // linearSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // linearSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // linearPQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // linearHeapVecContainer
 
       // --- MutableLinear ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // mutableLinearVectorContainer
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),           // mutableLinearListContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // mutableLinearSortVecContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // mutableLinearHeapVecContainer
 
       // --- SortableLinear ---
-      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // sortableLinearSortVec1Container
-      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // sortableLinearSortVec2Container
+      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // sortableLinearSortVecContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // sortableLinearHeapVecContainer
+
+      // --- Set ---
+      lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),       // setVec
+      lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),       // setLst
+
+      // --- Heap ---
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // heap1
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // heap2
+
+      // --- PQ ---
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // pq1
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // pq2
 
       // --- Concrete ---
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),           // list1
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),           // list2
-      lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // setVec
-      lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // setLst
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // vector1
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // vector2
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // setLst1
@@ -261,21 +483,28 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // setVec1
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 1, 1)),   // setVec2
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // sortableVector1
-      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1))  // sortableVector2
+      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)), // sortableVector2
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // heapVec1
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),        // heapVec2
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1)),         // pqHeap1
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 1, 1))          // pqHeap2
     );
 
     return std::move(testBox);
   }
-
+    
   template <typename Data>
   BoxRandomTester<Data> MultiBoxes(const lasd::Vector<Data> &Alphabet, ulong maxsize) {
     BoxRandomTester<Data> testBox(
+      
       // --- Container ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // vectorContainer
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),           // listContainer
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // sortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // pqHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // heapVecContainer
 
       // --- Testable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // testableVectorContainer
@@ -283,12 +512,16 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // testableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // testableSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // testableSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // testablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // testableHeapVecContainer
 
       // --- Clearable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // clearableVectorContainer
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),           // clearableListContainer
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // clearableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // clearableSetLstContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // clearablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // clearableHeapVecContainer
 
       // --- Resizable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // resizableVectorContainer
@@ -304,6 +537,8 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // traversableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // traversableSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // traversableSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // traversablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // traversableHeapVecContainer
 
       // --- OrderedDictionary ---
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // orderedDictionarySetVecContainer
@@ -320,6 +555,8 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // preOrderTraversableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // preOrderTraversableSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // preOrderTraversableSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // preOrderTraversablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // preOrderTraversableHeapVecContainer
 
       // --- PostOrderTraversable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // postOrderTraversableVectorContainer
@@ -327,6 +564,8 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // postOrderTraversableSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // postOrderTraversableSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // postOrderTraversableSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // postOrderTraversablePQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // postOrderTraversableHeapVecContainer
 
       // --- PreOrderMappable ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // preOrderMappableVectorContainer
@@ -344,21 +583,34 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // linearSetVecContainer
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // linearSetLstContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // linearSortVecContainer
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // linearPQHeapContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // linearHeapVecContainer
 
       // --- MutableLinear ---
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // mutableLinearVectorContainer
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),           // mutableLinearListContainer
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // mutableLinearSortVecContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // mutableLinearHeapVecContainer
 
       // --- SortableLinear ---
-      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // sortableLinearSortVec1Container
-      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // sortableLinearSortVec2Container
+      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // sortableLinearSortVecContainer
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // sortableLinearHeapVecContainer
+
+      // --- Set ---
+      lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setVec
+      lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setLst
+
+      // --- Heap ---
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // heap1
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // heap2
+
+      // --- PQ ---
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // pq1
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // pq2
 
       // --- Concrete ---
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),           // list1
       lasd::List<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),           // list2
-      lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setVec
-      lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setLst
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // vector1
       lasd::Vector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // vector2
       lasd::SetLst<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setLst1
@@ -366,12 +618,16 @@ namespace myT
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setVec1
       lasd::SetVec<Data>(getRandomUniqueTraversableContainer<Data>(Alphabet, 2, maxsize)),   // setVec2
       lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // sortableVector1
-      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize))  // sortableVector2
+      lasd::SortableVector<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)), // sortableVector2
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // heapVec1
+      lasd::HeapVec<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),        // heapVec2
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize)),         // pqHeap1
+      lasd::PQHeap<Data>(getRandomTraversableContainer<Data>(Alphabet, 2, maxsize))          // pqHeap2
     );
 
     return std::move(testBox);
   }
-    
+
   template <typename Data>
   class BoxRandomTester
   {
@@ -387,6 +643,8 @@ namespace myT
     lasd::Container &setVecContainer;
     lasd::Container &setLstContainer;
     lasd::Container &sortVecContainer;
+    lasd::Container &pqHeapContainer;           // PQHeap as Container
+    lasd::Container &heapVecContainer;          // HeapVec as Container
 
     /* ************************************************************************** */
     // TestableContainer interfaces
@@ -396,6 +654,8 @@ namespace myT
     lasd::TestableContainer<Data> &testableSetVecContainer;
     lasd::TestableContainer<Data> &testableSetLstContainer;
     lasd::TestableContainer<Data> &testableSortVecContainer;
+    lasd::TestableContainer<Data> &testablePQHeapContainer;      // PQHeap as TestableContainer
+    lasd::TestableContainer<Data> &testableHeapVecContainer;     // HeapVec as TestableContainer
 
     /* ************************************************************************** */
     // ClearableContainer interfaces
@@ -404,6 +664,8 @@ namespace myT
     lasd::ClearableContainer &clearableListContainer;
     lasd::ClearableContainer &clearableSetVecContainer;
     lasd::ClearableContainer &clearableSetLstContainer;
+    lasd::ClearableContainer &clearablePQHeapContainer;          // PQHeap as ClearableContainer
+    lasd::ClearableContainer &clearableHeapVecContainer;         // HeapVec as ClearableContainer
 
     /* ************************************************************************** */
     // ResizableContainer interfaces
@@ -425,6 +687,8 @@ namespace myT
     lasd::TraversableContainer<Data> &traversableSetVecContainer;
     lasd::TraversableContainer<Data> &traversableSetLstContainer;
     lasd::TraversableContainer<Data> &traversableSortVecContainer;
+    lasd::TraversableContainer<Data> &traversablePQHeapContainer;    // PQHeap as TraversableContainer
+    lasd::TraversableContainer<Data> &traversableHeapVecContainer;   // HeapVec as TraversableContainer
 
     /* ************************************************************************** */
     // OrderedDictionaryContainer interfaces
@@ -447,6 +711,8 @@ namespace myT
     lasd::PreOrderTraversableContainer<Data> &preOrderTraversableSetVecContainer;
     lasd::PreOrderTraversableContainer<Data> &preOrderTraversableSetLstContainer;
     lasd::PreOrderTraversableContainer<Data> &preOrderTraversableSortVecContainer;
+    lasd::PreOrderTraversableContainer<Data> &preOrderTraversablePQHeapContainer;    // PQHeap as PreOrderTraversableContainer
+    lasd::PreOrderTraversableContainer<Data> &preOrderTraversableHeapVecContainer;   // HeapVec as PreOrderTraversableContainer
 
     /* ************************************************************************** */
     // PostOrderTraversableContainer interfaces
@@ -456,6 +722,8 @@ namespace myT
     lasd::PostOrderTraversableContainer<Data> &postOrderTraversableSetVecContainer;
     lasd::PostOrderTraversableContainer<Data> &postOrderTraversableSetLstContainer;
     lasd::PostOrderTraversableContainer<Data> &postOrderTraversableSortVecContainer;
+    lasd::PostOrderTraversableContainer<Data> &postOrderTraversablePQHeapContainer;    // PQHeap as PostOrderTraversableContainer
+    lasd::PostOrderTraversableContainer<Data> &postOrderTraversableHeapVecContainer;   // HeapVec as PostOrderTraversableContainer
 
     /* ************************************************************************** */
     // PreOrderMappableContainer interfaces
@@ -479,6 +747,8 @@ namespace myT
     lasd::LinearContainer<Data> &linearSetVecContainer;
     lasd::LinearContainer<Data> &linearSetLstContainer;
     lasd::LinearContainer<Data> &linearSortVecContainer;
+    lasd::LinearContainer<Data> &linearPQHeapContainer;      // PQHeap as LinearContainer
+    lasd::LinearContainer<Data> &linearHeapVecContainer;     // HeapVec as LinearContainer
 
     /* ************************************************************************** */
     // MutableLinearContainer interfaces
@@ -486,20 +756,37 @@ namespace myT
     lasd::MutableLinearContainer<Data> &mutableLinearVectorContainer;
     lasd::MutableLinearContainer<Data> &mutableLinearListContainer;
     lasd::MutableLinearContainer<Data> &mutableLinearSortVecContainer;
+    lasd::MutableLinearContainer<Data> &mutableLinearHeapVecContainer; // HeapVec as MutableLinearContainer
 
     /* ************************************************************************** */
     // SortableLinearContainer interfaces
     /* ************************************************************************** */
-    lasd::SortableLinearContainer<Data> &sortableLinearSortVec1Container;
-    lasd::SortableLinearContainer<Data> &sortableLinearSortVec2Container;
+    lasd::SortableLinearContainer<Data> &sortableLinearSortVecContainer;
+    lasd::SortableLinearContainer<Data> &sortableLinearHeapVecContainer; // HeapVec as SortableLinearContainer
+
+    /* ************************************************************************** */
+    // Set interfaces
+    /* ************************************************************************** */
+    lasd::Set<Data> &setVec;
+    lasd::Set<Data> &setLst;
+
+    /* ************************************************************************** */
+    // Heap interfaces
+    /* ************************************************************************** */
+    lasd::Heap<Data> &heap1; // HeapVec as Heap
+    lasd::Heap<Data> &heap2; // HeapVec as Heap
+
+    /* ************************************************************************** */
+    // PQ interfaces
+    /* ************************************************************************** */
+    lasd::PQ<Data> &pq1; // PQHeap as PQ
+    lasd::PQ<Data> &pq2; // PQHeap as PQ
 
     /* ************************************************************************** */
     // Concrete data structures
     /* ************************************************************************** */
     lasd::List<Data> &list1;
     lasd::List<Data> &list2;
-    lasd::Set<Data> &setVec;
-    lasd::Set<Data> &setLst;
     lasd::Vector<Data> &vector1;
     lasd::Vector<Data> &vector2;
     lasd::SetLst<Data> &setLst1;
@@ -508,6 +795,10 @@ namespace myT
     lasd::SetVec<Data> &setVec2;
     lasd::SortableVector<Data> &sortableVector1;
     lasd::SortableVector<Data> &sortableVector2;
+    lasd::HeapVec<Data> &heapVec1; // Concrete HeapVec instance
+    lasd::HeapVec<Data> &heapVec2; // Concrete HeapVec instance
+    lasd::PQHeap<Data> &pqHeap1; // Concrete PQHeap instance
+    lasd::PQHeap<Data> &pqHeap2; // Concrete PQHeap instance
 
     BoxRandomTester(const BoxRandomTester<Data> &) = delete;
     BoxRandomTester<Data> &operator=(const BoxRandomTester<Data> &) = delete;
@@ -520,6 +811,8 @@ namespace myT
       *dynamic_cast<lasd::SetVec<Data>*>(&setVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.setVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&setLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.setLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&sortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&pqHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.pqHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&heapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.heapVecContainer));
 
       // --- Testable ---
       *dynamic_cast<lasd::Vector<Data>*>(&testableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.testableVectorContainer));
@@ -527,12 +820,16 @@ namespace myT
       *dynamic_cast<lasd::SetVec<Data>*>(&testableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.testableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&testableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.testableSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&testableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.testableSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&testablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.testablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&testableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.testableHeapVecContainer));
 
       // --- Clearable ---
       *dynamic_cast<lasd::Vector<Data>*>(&clearableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.clearableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&clearableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(other.clearableListContainer));
       *dynamic_cast<lasd::SetVec<Data>*>(&clearableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.clearableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&clearableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.clearableSetLstContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&clearablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.clearablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&clearableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.clearableHeapVecContainer));
 
       // --- Resizable ---
       *dynamic_cast<lasd::Vector<Data>*>(&resizableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.resizableVectorContainer));
@@ -548,6 +845,8 @@ namespace myT
       *dynamic_cast<lasd::SetVec<Data>*>(&traversableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.traversableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&traversableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.traversableSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&traversableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.traversableSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&traversablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.traversablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&traversableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.traversableHeapVecContainer));
 
       // --- OrderedDictionary ---
       *dynamic_cast<lasd::SetVec<Data>*>(&orderedDictionarySetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.orderedDictionarySetVecContainer));
@@ -564,6 +863,8 @@ namespace myT
       *dynamic_cast<lasd::SetVec<Data>*>(&preOrderTraversableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.preOrderTraversableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&preOrderTraversableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.preOrderTraversableSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&preOrderTraversableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.preOrderTraversableSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&preOrderTraversablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.preOrderTraversablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&preOrderTraversableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.preOrderTraversableHeapVecContainer));
 
       // --- PostOrderTraversable ---
       *dynamic_cast<lasd::Vector<Data>*>(&postOrderTraversableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.postOrderTraversableVectorContainer));
@@ -571,6 +872,8 @@ namespace myT
       *dynamic_cast<lasd::SetVec<Data>*>(&postOrderTraversableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.postOrderTraversableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&postOrderTraversableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.postOrderTraversableSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&postOrderTraversableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.postOrderTraversableSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&postOrderTraversablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.postOrderTraversablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&postOrderTraversableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.postOrderTraversableHeapVecContainer));
 
       // --- PreOrderMappable ---
       *dynamic_cast<lasd::Vector<Data>*>(&preOrderMappableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.preOrderMappableVectorContainer));
@@ -588,21 +891,34 @@ namespace myT
       *dynamic_cast<lasd::SetVec<Data>*>(&linearSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.linearSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&linearSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.linearSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&linearSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.linearSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&linearPQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.linearPQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&linearHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.linearHeapVecContainer));
 
       // --- MutableLinear ---
       *dynamic_cast<lasd::Vector<Data>*>(&mutableLinearVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.mutableLinearVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&mutableLinearListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(other.mutableLinearListContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&mutableLinearSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.mutableLinearSortVecContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&mutableLinearHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.mutableLinearHeapVecContainer));
 
       // --- SortableLinear ---
-      *dynamic_cast<lasd::SortableVector<Data>*>(&sortableLinearSortVec1Container) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortableLinearSortVec1Container));
-      *dynamic_cast<lasd::SortableVector<Data>*>(&sortableLinearSortVec2Container) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortableLinearSortVec2Container));
+      *dynamic_cast<lasd::SortableVector<Data>*>(&sortableLinearSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortableLinearSortVecContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&sortableLinearHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.sortableLinearHeapVecContainer));
+
+      // --- Set ---
+      *dynamic_cast<lasd::SetVec<Data>*>(&setVec) = std::move(dynamic_cast<lasd::Set<Data>&>(other.setVec));
+      *dynamic_cast<lasd::SetLst<Data>*>(&setLst) = std::move(dynamic_cast<lasd::Set<Data>&>(other.setLst));
+
+      // --- Heap ---
+      *dynamic_cast<lasd::HeapVec<Data>*>(&heap1) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.heap1));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&heap2) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.heap2));
+
+      // --- PQ ---
+      *dynamic_cast<lasd::PQHeap<Data>*>(&pq1) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.pq1));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&pq2) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.pq2));
 
       // --- Concrete ---
       *dynamic_cast<lasd::List<Data>*>(&list1) = std::move(dynamic_cast<lasd::List<Data>&>(other.list1));
       *dynamic_cast<lasd::List<Data>*>(&list2) = std::move(dynamic_cast<lasd::List<Data>&>(other.list2));
-      *dynamic_cast<lasd::SetVec<Data>*>(&setVec) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.setVec));
-      *dynamic_cast<lasd::SetLst<Data>*>(&setLst) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.setLst));
       *dynamic_cast<lasd::Vector<Data>*>(&vector1) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.vector1));
       *dynamic_cast<lasd::Vector<Data>*>(&vector2) = std::move(dynamic_cast<lasd::Vector<Data>&>(other.vector2));
       *dynamic_cast<lasd::SetLst<Data>*>(&setLst1) = std::move(dynamic_cast<lasd::SetLst<Data>&>(other.setLst1));
@@ -611,7 +927,11 @@ namespace myT
       *dynamic_cast<lasd::SetVec<Data>*>(&setVec2) = std::move(dynamic_cast<lasd::SetVec<Data>&>(other.setVec2));
       *dynamic_cast<lasd::SortableVector<Data>*>(&sortableVector1) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortableVector1));
       *dynamic_cast<lasd::SortableVector<Data>*>(&sortableVector2) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(other.sortableVector2));
-      
+      *dynamic_cast<lasd::HeapVec<Data>*>(&heapVec1) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.heapVec1));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&heapVec2) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(other.heapVec2));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&pqHeap1) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.pqHeap1));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&pqHeap2) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(other.pqHeap2));
+
       return *this;
     }
 
@@ -620,14 +940,16 @@ namespace myT
         (*this) = std::move(other);
     }
 
-
     BoxRandomTester()
+
       // --- Container ---
       : vectorContainer(*new lasd::Vector<Data>())
       , listContainer(*new lasd::List<Data>())
       , setVecContainer(*new lasd::SetVec<Data>())
       , setLstContainer(*new lasd::SetLst<Data>())
       , sortVecContainer(*new lasd::SortableVector<Data>())
+      , pqHeapContainer(*new lasd::PQHeap<Data>())
+      , heapVecContainer(*new lasd::HeapVec<Data>())
 
       // --- Testable ---
       , testableVectorContainer(*new lasd::Vector<Data>())
@@ -635,12 +957,16 @@ namespace myT
       , testableSetVecContainer(*new lasd::SetVec<Data>())
       , testableSetLstContainer(*new lasd::SetLst<Data>())
       , testableSortVecContainer(*new lasd::SortableVector<Data>())
+      , testablePQHeapContainer(*new lasd::PQHeap<Data>())
+      , testableHeapVecContainer(*new lasd::HeapVec<Data>())
 
       // --- Clearable ---
       , clearableVectorContainer(*new lasd::Vector<Data>())
       , clearableListContainer(*new lasd::List<Data>())
       , clearableSetVecContainer(*new lasd::SetVec<Data>())
       , clearableSetLstContainer(*new lasd::SetLst<Data>())
+      , clearablePQHeapContainer(*new lasd::PQHeap<Data>())
+      , clearableHeapVecContainer(*new lasd::HeapVec<Data>())
 
       // --- Resizable ---
       , resizableVectorContainer(*new lasd::Vector<Data>())
@@ -656,6 +982,8 @@ namespace myT
       , traversableSetVecContainer(*new lasd::SetVec<Data>())
       , traversableSetLstContainer(*new lasd::SetLst<Data>())
       , traversableSortVecContainer(*new lasd::SortableVector<Data>())
+      , traversablePQHeapContainer(*new lasd::PQHeap<Data>())
+      , traversableHeapVecContainer(*new lasd::HeapVec<Data>())
 
       // --- OrderedDictionary ---
       , orderedDictionarySetVecContainer(*new lasd::SetVec<Data>())
@@ -672,6 +1000,8 @@ namespace myT
       , preOrderTraversableSetVecContainer(*new lasd::SetVec<Data>())
       , preOrderTraversableSetLstContainer(*new lasd::SetLst<Data>())
       , preOrderTraversableSortVecContainer(*new lasd::SortableVector<Data>())
+      , preOrderTraversablePQHeapContainer(*new lasd::PQHeap<Data>())
+      , preOrderTraversableHeapVecContainer(*new lasd::HeapVec<Data>())
 
       // --- PostOrderTraversable ---
       , postOrderTraversableVectorContainer(*new lasd::Vector<Data>())
@@ -679,6 +1009,8 @@ namespace myT
       , postOrderTraversableSetVecContainer(*new lasd::SetVec<Data>())
       , postOrderTraversableSetLstContainer(*new lasd::SetLst<Data>())
       , postOrderTraversableSortVecContainer(*new lasd::SortableVector<Data>())
+      , postOrderTraversablePQHeapContainer(*new lasd::PQHeap<Data>())
+      , postOrderTraversableHeapVecContainer(*new lasd::HeapVec<Data>())
 
       // --- PreOrderMappable ---
       , preOrderMappableVectorContainer(*new lasd::Vector<Data>())
@@ -696,21 +1028,34 @@ namespace myT
       , linearSetVecContainer(*new lasd::SetVec<Data>())
       , linearSetLstContainer(*new lasd::SetLst<Data>())
       , linearSortVecContainer(*new lasd::SortableVector<Data>())
+      , linearPQHeapContainer(*new lasd::PQHeap<Data>())
+      , linearHeapVecContainer(*new lasd::HeapVec<Data>())
 
       // --- MutableLinear ---
       , mutableLinearVectorContainer(*new lasd::Vector<Data>())
       , mutableLinearListContainer(*new lasd::List<Data>())
       , mutableLinearSortVecContainer(*new lasd::SortableVector<Data>())
+      , mutableLinearHeapVecContainer(*new lasd::HeapVec<Data>())
 
       // --- SortableLinear ---
-      , sortableLinearSortVec1Container(*new lasd::SortableVector<Data>())
-      , sortableLinearSortVec2Container(*new lasd::SortableVector<Data>())
+      , sortableLinearSortVecContainer(*new lasd::SortableVector<Data>())
+      , sortableLinearHeapVecContainer(*new lasd::HeapVec<Data>())
+
+      // --- Set ---
+      , setVec(*new lasd::SetVec<Data>())
+      , setLst(*new lasd::SetLst<Data>())
+
+      // --- Heap ---
+      , heap1(*new lasd::HeapVec<Data>())
+      , heap2(*new lasd::HeapVec<Data>())
+
+      // --- PQ ---
+      , pq1(*new lasd::PQHeap<Data>())
+      , pq2(*new lasd::PQHeap<Data>())
 
       // --- Concrete ---
       , list1(*new lasd::List<Data>())
       , list2(*new lasd::List<Data>())
-      , setVec(*new lasd::SetVec<Data>())
-      , setLst(*new lasd::SetLst<Data>())
       , vector1(*new lasd::Vector<Data>())
       , vector2(*new lasd::Vector<Data>())
       , setLst1(*new lasd::SetLst<Data>())
@@ -719,167 +1064,257 @@ namespace myT
       , setVec2(*new lasd::SetVec<Data>())
       , sortableVector1(*new lasd::SortableVector<Data>())
       , sortableVector2(*new lasd::SortableVector<Data>())
+      , heapVec1(*new lasd::HeapVec<Data>())
+      , heapVec2(*new lasd::HeapVec<Data>())
+      , pqHeap1(*new lasd::PQHeap<Data>())
+      , pqHeap2(*new lasd::PQHeap<Data>())
     {}
 
     BoxRandomTester(
+
       // --- Container ---
-      lasd::Container &&vectorContainer,           // vectorContainer
-      lasd::Container &&listContainer,             // listContainer
-      lasd::Container &&setVecContainer,           // setVecContainer
-      lasd::Container &&setLstContainer,           // setLstContainer
-      lasd::Container &&sortVecContainer,          // sortVecContainer
+      lasd::Container &&vectorContainer,
+      lasd::Container &&listContainer,
+      lasd::Container &&setVecContainer,
+      lasd::Container &&setLstContainer,
+      lasd::Container &&sortVecContainer,
+      lasd::Container &&pqHeapContainer,
+      lasd::Container &&heapVecContainer,
 
       // --- Testable ---
-      lasd::TestableContainer<Data> &&testableVectorContainer,    // testableVectorContainer
-      lasd::TestableContainer<Data> &&testableListContainer,      // testableListContainer
-      lasd::TestableContainer<Data> &&testableSetVecContainer,    // testableSetVecContainer
-      lasd::TestableContainer<Data> &&testableSetLstContainer,    // testableSetLstContainer
-      lasd::TestableContainer<Data> &&testableSortVecContainer,   // testableSortVecContainer
+      lasd::TestableContainer<Data> &&testableVectorContainer,
+      lasd::TestableContainer<Data> &&testableListContainer,
+      lasd::TestableContainer<Data> &&testableSetVecContainer,
+      lasd::TestableContainer<Data> &&testableSetLstContainer,
+      lasd::TestableContainer<Data> &&testableSortVecContainer,
+      lasd::TestableContainer<Data> &&testablePQHeapContainer,
+      lasd::TestableContainer<Data> &&testableHeapVecContainer,
 
       // --- Clearable ---
-      lasd::ClearableContainer &&clearableVectorContainer,        // clearableVectorContainer
-      lasd::ClearableContainer &&clearableListContainer,          // clearableListContainer
-      lasd::ClearableContainer &&clearableSetVecContainer,        // clearableSetVecContainer
-      lasd::ClearableContainer &&clearableSetLstContainer,        // clearableSetLstContainer
+      lasd::ClearableContainer &&clearableVectorContainer,
+      lasd::ClearableContainer &&clearableListContainer,
+      lasd::ClearableContainer &&clearableSetVecContainer,
+      lasd::ClearableContainer &&clearableSetLstContainer,
+      lasd::ClearableContainer &&clearablePQHeapContainer,
+      lasd::ClearableContainer &&clearableHeapVecContainer,
 
       // --- Resizable ---
-      lasd::ResizableContainer &&resizableVectorContainer,        // resizableVectorContainer
-      lasd::ResizableContainer &&resizableSortVecContainer,       // resizableSortVecContainer
+      lasd::ResizableContainer &&resizableVectorContainer,
+      lasd::ResizableContainer &&resizableSortVecContainer,
 
       // --- Dictionary ---
-      lasd::DictionaryContainer<Data> &&dictionarySetVecContainer, // dictionarySetVecContainer
-      lasd::DictionaryContainer<Data> &&dictionarySetLstContainer, // dictionarySetLstContainer
+      lasd::DictionaryContainer<Data> &&dictionarySetVecContainer,
+      lasd::DictionaryContainer<Data> &&dictionarySetLstContainer,
 
       // --- Traversable ---
-      lasd::TraversableContainer<Data> &&traversableVectorContainer, // traversableVectorContainer
-      lasd::TraversableContainer<Data> &&traversableListContainer,   // traversableListContainer
-      lasd::TraversableContainer<Data> &&traversableSetVecContainer, // traversableSetVecContainer
-      lasd::TraversableContainer<Data> &&traversableSetLstContainer, // traversableSetLstContainer
-      lasd::TraversableContainer<Data> &&traversableSortVecContainer,// traversableSortVecContainer
+      lasd::TraversableContainer<Data> &&traversableVectorContainer,
+      lasd::TraversableContainer<Data> &&traversableListContainer,
+      lasd::TraversableContainer<Data> &&traversableSetVecContainer,
+      lasd::TraversableContainer<Data> &&traversableSetLstContainer,
+      lasd::TraversableContainer<Data> &&traversableSortVecContainer,
+      lasd::TraversableContainer<Data> &&traversablePQHeapContainer,
+      lasd::TraversableContainer<Data> &&traversableHeapVecContainer,
 
       // --- OrderedDictionary ---
-      lasd::OrderedDictionaryContainer<Data> &&orderedDictionarySetVecContainer, // orderedDictionarySetVecContainer
-      lasd::OrderedDictionaryContainer<Data> &&orderedDictionarySetLstContainer, // orderedDictionarySetLstContainer
+      lasd::OrderedDictionaryContainer<Data> &&orderedDictionarySetVecContainer,
+      lasd::OrderedDictionaryContainer<Data> &&orderedDictionarySetLstContainer,
 
       // --- Mappable ---
-      lasd::MappableContainer<Data> &&mappableVectorContainer,     // mappableVectorContainer
-      lasd::MappableContainer<Data> &&mappableListContainer,       // mappableListContainer
-      lasd::MappableContainer<Data> &&mappableSortVecContainer,    // mappableSortVecContainer
+      lasd::MappableContainer<Data> &&mappableVectorContainer,
+      lasd::MappableContainer<Data> &&mappableListContainer,
+      lasd::MappableContainer<Data> &&mappableSortVecContainer,
 
       // --- PreOrderTraversable ---
-      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableVectorContainer, // preOrderTraversableVectorContainer
-      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableListContainer,   // preOrderTraversableListContainer
-      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableSetVecContainer, // preOrderTraversableSetVecContainer
-      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableSetLstContainer, // preOrderTraversableSetLstContainer
-      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableSortVecContainer,// preOrderTraversableSortVecContainer
+      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableVectorContainer,
+      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableListContainer,
+      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableSetVecContainer,
+      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableSetLstContainer,
+      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableSortVecContainer,
+      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversablePQHeapContainer,
+      lasd::PreOrderTraversableContainer<Data> &&preOrderTraversableHeapVecContainer,
 
       // --- PostOrderTraversable ---
-      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableVectorContainer, // postOrderTraversableVectorContainer
-      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableListContainer,   // postOrderTraversableListContainer
-      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableSetVecContainer, // postOrderTraversableSetVecContainer
-      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableSetLstContainer, // postOrderTraversableSetLstContainer
-      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableSortVecContainer,// postOrderTraversableSortVecContainer
+      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableVectorContainer,
+      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableListContainer,
+      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableSetVecContainer,
+      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableSetLstContainer,
+      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableSortVecContainer,
+      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversablePQHeapContainer,
+      lasd::PostOrderTraversableContainer<Data> &&postOrderTraversableHeapVecContainer,
 
       // --- PreOrderMappable ---
-      lasd::PreOrderMappableContainer<Data> &&preOrderMappableVectorContainer, // preOrderMappableVectorContainer
-      lasd::PreOrderMappableContainer<Data> &&preOrderMappableListContainer,   // preOrderMappableListContainer
-      lasd::PreOrderMappableContainer<Data> &&preOrderMappableSortVecContainer,// preOrderMappableSortVecContainer
+      lasd::PreOrderMappableContainer<Data> &&preOrderMappableVectorContainer,
+      lasd::PreOrderMappableContainer<Data> &&preOrderMappableListContainer,
+      lasd::PreOrderMappableContainer<Data> &&preOrderMappableSortVecContainer,
 
       // --- PostOrderMappable ---
-      lasd::PostOrderMappableContainer<Data> &&postOrderMappableVectorContainer, // postOrderMappableVectorContainer
-      lasd::PostOrderMappableContainer<Data> &&postOrderMappableListContainer,   // postOrderMappableListContainer
-      lasd::PostOrderMappableContainer<Data> &&postOrderMappableSortVecContainer,// postOrderMappableSortVecContainer
+      lasd::PostOrderMappableContainer<Data> &&postOrderMappableVectorContainer,
+      lasd::PostOrderMappableContainer<Data> &&postOrderMappableListContainer,
+      lasd::PostOrderMappableContainer<Data> &&postOrderMappableSortVecContainer,
 
       // --- Linear ---
-      lasd::LinearContainer<Data> &&linearVectorContainer,         // linearVectorContainer
-      lasd::LinearContainer<Data> &&linearListContainer,           // linearListContainer
-      lasd::LinearContainer<Data> &&linearSetVecContainer,         // linearSetVecContainer
-      lasd::LinearContainer<Data> &&linearSetLstContainer,         // linearSetLstContainer
-      lasd::LinearContainer<Data> &&linearSortVecContainer,        // linearSortVecContainer
+      lasd::LinearContainer<Data> &&linearVectorContainer,
+      lasd::LinearContainer<Data> &&linearListContainer,
+      lasd::LinearContainer<Data> &&linearSetVecContainer,
+      lasd::LinearContainer<Data> &&linearSetLstContainer,
+      lasd::LinearContainer<Data> &&linearSortVecContainer,
+      lasd::LinearContainer<Data> &&linearPQHeapContainer,
+      lasd::LinearContainer<Data> &&linearHeapVecContainer,
 
       // --- MutableLinear ---
-      lasd::MutableLinearContainer<Data> &&mutableLinearVectorContainer, // mutableLinearVectorContainer
-      lasd::MutableLinearContainer<Data> &&mutableLinearListContainer,   // mutableLinearListContainer
-      lasd::MutableLinearContainer<Data> &&mutableLinearSortVecContainer,// mutableLinearSortVecContainer
+      lasd::MutableLinearContainer<Data> &&mutableLinearVectorContainer,
+      lasd::MutableLinearContainer<Data> &&mutableLinearListContainer,
+      lasd::MutableLinearContainer<Data> &&mutableLinearSortVecContainer,
+      lasd::MutableLinearContainer<Data> &&mutableLinearHeapVecContainer,
 
       // --- SortableLinear ---
-      lasd::SortableLinearContainer<Data> &&sortableLinearSortVec1Container, // sortableLinearSortVec1Container
-      lasd::SortableLinearContainer<Data> &&sortableLinearSortVec2Container, // sortableLinearSortVec2Container
+      lasd::SortableLinearContainer<Data> &&sortableLinearSortVecContainer,
+      lasd::SortableLinearContainer<Data> &&sortableLinearHeapVecContainer,
+
+      // --- Set ---
+      lasd::Set<Data> &&setVec,
+      lasd::Set<Data> &&setLst,
+
+      // --- Heap ---
+      lasd::Heap<Data> &&heap1,
+      lasd::Heap<Data> &&heap2,
+
+      // --- PQ ---
+      lasd::PQ<Data> &&pq1,
+      lasd::PQ<Data> &&pq2,
 
       // --- Concrete ---
-      lasd::List<Data> &&list1,                         // list1
-      lasd::List<Data> &&list2,                         // list2
-      lasd::Set<Data> &&setVec,                         // setVec
-      lasd::Set<Data> &&setLst,                         // setLst
-      lasd::Vector<Data> &&vector1,                     // vector1
-      lasd::Vector<Data> &&vector2,                     // vector2
-      lasd::SetLst<Data> &&setLst1,                     // setLst1
-      lasd::SetLst<Data> &&setLst2,                     // setLst2
-      lasd::SetVec<Data> &&setVec1,                     // setVec1
-      lasd::SetVec<Data> &&setVec2,                     // setVec2
-      lasd::SortableVector<Data> &&sortableVector1,     // sortableVector1
-      lasd::SortableVector<Data> &&sortableVector2      // sortableVector2
+      lasd::List<Data> &&list1,
+      lasd::List<Data> &&list2,
+      lasd::Vector<Data> &&vector1,
+      lasd::Vector<Data> &&vector2,
+      lasd::SetLst<Data> &&setLst1,
+      lasd::SetLst<Data> &&setLst2,
+      lasd::SetVec<Data> &&setVec1,
+      lasd::SetVec<Data> &&setVec2,
+      lasd::SortableVector<Data> &&sortableVector1,
+      lasd::SortableVector<Data> &&sortableVector2,
+      lasd::HeapVec<Data> &&heapVec1,
+      lasd::HeapVec<Data> &&heapVec2,
+      lasd::PQHeap<Data> &&pqHeap1,
+      lasd::PQHeap<Data> &&pqHeap2
     )
     : BoxRandomTester<Data>()
     {
+      // --- Container ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->vectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(vectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->listContainer) = std::move(dynamic_cast<lasd::List<Data>&>(listContainer));
       *dynamic_cast<lasd::SetVec<Data>*>(&this->setVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(setVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->setLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(setLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->pqHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(pqHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->heapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(heapVecContainer));
+
+      // --- Testable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->testableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(testableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->testableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(testableListContainer));
       *dynamic_cast<lasd::SetVec<Data>*>(&this->testableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(testableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->testableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(testableSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->testableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(testableSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->testablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(testablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->testableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(testableHeapVecContainer));
+
+      // --- Clearable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->clearableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(clearableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->clearableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(clearableListContainer));
       *dynamic_cast<lasd::SetVec<Data>*>(&this->clearableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(clearableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->clearableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(clearableSetLstContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->clearablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(clearablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->clearableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(clearableHeapVecContainer));
+
+      // --- Resizable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->resizableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(resizableVectorContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->resizableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(resizableSortVecContainer));
+
+      // --- Dictionary ---
       *dynamic_cast<lasd::SetVec<Data>*>(&this->dictionarySetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(dictionarySetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->dictionarySetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(dictionarySetLstContainer));
+
+      // --- Traversable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->traversableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(traversableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->traversableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(traversableListContainer));
       *dynamic_cast<lasd::SetVec<Data>*>(&this->traversableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(traversableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->traversableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(traversableSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->traversableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(traversableSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->traversablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(traversablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->traversableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(traversableHeapVecContainer));
+
+      // --- OrderedDictionary ---
       *dynamic_cast<lasd::SetVec<Data>*>(&this->orderedDictionarySetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(orderedDictionarySetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->orderedDictionarySetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(orderedDictionarySetLstContainer));
+
+      // --- Mappable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->mappableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(mappableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->mappableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(mappableListContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->mappableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(mappableSortVecContainer));
+
+      // --- PreOrderTraversable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->preOrderTraversableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(preOrderTraversableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->preOrderTraversableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(preOrderTraversableListContainer));
       *dynamic_cast<lasd::SetVec<Data>*>(&this->preOrderTraversableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(preOrderTraversableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->preOrderTraversableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(preOrderTraversableSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->preOrderTraversableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(preOrderTraversableSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->preOrderTraversablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(preOrderTraversablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->preOrderTraversableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(preOrderTraversableHeapVecContainer));
+
+      // --- PostOrderTraversable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->postOrderTraversableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(postOrderTraversableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->postOrderTraversableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(postOrderTraversableListContainer));
       *dynamic_cast<lasd::SetVec<Data>*>(&this->postOrderTraversableSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(postOrderTraversableSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->postOrderTraversableSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(postOrderTraversableSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->postOrderTraversableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(postOrderTraversableSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->postOrderTraversablePQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(postOrderTraversablePQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->postOrderTraversableHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(postOrderTraversableHeapVecContainer));
+
+      // --- PreOrderMappable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->preOrderMappableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(preOrderMappableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->preOrderMappableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(preOrderMappableListContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->preOrderMappableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(preOrderMappableSortVecContainer));
+
+      // --- PostOrderMappable ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->postOrderMappableVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(postOrderMappableVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->postOrderMappableListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(postOrderMappableListContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->postOrderMappableSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(postOrderMappableSortVecContainer));
+
+      // --- Linear ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->linearVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(linearVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->linearListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(linearListContainer));
       *dynamic_cast<lasd::SetVec<Data>*>(&this->linearSetVecContainer) = std::move(dynamic_cast<lasd::SetVec<Data>&>(linearSetVecContainer));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->linearSetLstContainer) = std::move(dynamic_cast<lasd::SetLst<Data>&>(linearSetLstContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->linearSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(linearSortVecContainer));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->linearPQHeapContainer) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(linearPQHeapContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->linearHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(linearHeapVecContainer));
+
+      // --- MutableLinear ---
       *dynamic_cast<lasd::Vector<Data>*>(&this->mutableLinearVectorContainer) = std::move(dynamic_cast<lasd::Vector<Data>&>(mutableLinearVectorContainer));
       *dynamic_cast<lasd::List<Data>*>(&this->mutableLinearListContainer) = std::move(dynamic_cast<lasd::List<Data>&>(mutableLinearListContainer));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->mutableLinearSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(mutableLinearSortVecContainer));
-      *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortableLinearSortVec1Container) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortableLinearSortVec1Container));
-      *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortableLinearSortVec2Container) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortableLinearSortVec2Container));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->mutableLinearHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(mutableLinearHeapVecContainer));
+
+      // --- SortableLinear ---
+      *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortableLinearSortVecContainer) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortableLinearSortVecContainer));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->sortableLinearHeapVecContainer) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(sortableLinearHeapVecContainer));
+
+      // --- Set ---
+      *dynamic_cast<lasd::SetVec<Data>*>(&this->setVec) = std::move(dynamic_cast<lasd::Set<Data>&>(setVec));
+      *dynamic_cast<lasd::SetLst<Data>*>(&this->setLst) = std::move(dynamic_cast<lasd::Set<Data>&>(setLst));
+
+      // --- Heap ---
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->heap1) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(heap1));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->heap2) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(heap2));
+
+      // --- PQ ---
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->pq1) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(pq1));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->pq2) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(pq2));
+
+      // --- Concrete ---
       *dynamic_cast<lasd::List<Data>*>(&this->list1) = std::move(dynamic_cast<lasd::List<Data>&>(list1));
       *dynamic_cast<lasd::List<Data>*>(&this->list2) = std::move(dynamic_cast<lasd::List<Data>&>(list2));
-      *dynamic_cast<lasd::SetVec<Data>*>(&this->setVec) = std::move(dynamic_cast<lasd::SetVec<Data>&>(setVec));
-      *dynamic_cast<lasd::SetLst<Data>*>(&this->setLst) = std::move(dynamic_cast<lasd::SetLst<Data>&>(setLst));
       *dynamic_cast<lasd::Vector<Data>*>(&this->vector1) = std::move(dynamic_cast<lasd::Vector<Data>&>(vector1));
       *dynamic_cast<lasd::Vector<Data>*>(&this->vector2) = std::move(dynamic_cast<lasd::Vector<Data>&>(vector2));
       *dynamic_cast<lasd::SetLst<Data>*>(&this->setLst1) = std::move(dynamic_cast<lasd::SetLst<Data>&>(setLst1));
@@ -888,6 +1323,10 @@ namespace myT
       *dynamic_cast<lasd::SetVec<Data>*>(&this->setVec2) = std::move(dynamic_cast<lasd::SetVec<Data>&>(setVec2));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortableVector1) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortableVector1));
       *dynamic_cast<lasd::SortableVector<Data>*>(&this->sortableVector2) = std::move(dynamic_cast<lasd::SortableVector<Data>&>(sortableVector2));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->heapVec1) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(heapVec1));
+      *dynamic_cast<lasd::HeapVec<Data>*>(&this->heapVec2) = std::move(dynamic_cast<lasd::HeapVec<Data>&>(heapVec2));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->pqHeap1) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(pqHeap1));
+      *dynamic_cast<lasd::PQHeap<Data>*>(&this->pqHeap2) = std::move(dynamic_cast<lasd::PQHeap<Data>&>(pqHeap2));
     }
 
     ~BoxRandomTester()
@@ -898,6 +1337,8 @@ namespace myT
       delete &setVecContainer;
       delete &setLstContainer;
       delete &sortVecContainer;
+      delete &pqHeapContainer;
+      delete &heapVecContainer;
 
       // --- Testable ---
       delete &testableVectorContainer;
@@ -905,12 +1346,16 @@ namespace myT
       delete &testableSetVecContainer;
       delete &testableSetLstContainer;
       delete &testableSortVecContainer;
+      delete &testablePQHeapContainer;
+      delete &testableHeapVecContainer;
 
       // --- Clearable ---
       delete &clearableVectorContainer;
       delete &clearableListContainer;
       delete &clearableSetVecContainer;
       delete &clearableSetLstContainer;
+      delete &clearablePQHeapContainer;
+      delete &clearableHeapVecContainer;
 
       // --- Resizable ---
       delete &resizableVectorContainer;
@@ -926,6 +1371,8 @@ namespace myT
       delete &traversableSetVecContainer;
       delete &traversableSetLstContainer;
       delete &traversableSortVecContainer;
+      delete &traversablePQHeapContainer;
+      delete &traversableHeapVecContainer;
 
       // --- OrderedDictionary ---
       delete &orderedDictionarySetVecContainer;
@@ -942,6 +1389,8 @@ namespace myT
       delete &preOrderTraversableSetVecContainer;
       delete &preOrderTraversableSetLstContainer;
       delete &preOrderTraversableSortVecContainer;
+      delete &preOrderTraversablePQHeapContainer;
+      delete &preOrderTraversableHeapVecContainer;
 
       // --- PostOrderTraversable ---
       delete &postOrderTraversableVectorContainer;
@@ -949,6 +1398,8 @@ namespace myT
       delete &postOrderTraversableSetVecContainer;
       delete &postOrderTraversableSetLstContainer;
       delete &postOrderTraversableSortVecContainer;
+      delete &postOrderTraversablePQHeapContainer;
+      delete &postOrderTraversableHeapVecContainer;
 
       // --- PreOrderMappable ---
       delete &preOrderMappableVectorContainer;
@@ -966,21 +1417,34 @@ namespace myT
       delete &linearSetVecContainer;
       delete &linearSetLstContainer;
       delete &linearSortVecContainer;
+      delete &linearPQHeapContainer;
+      delete &linearHeapVecContainer;
 
       // --- MutableLinear ---
       delete &mutableLinearVectorContainer;
       delete &mutableLinearListContainer;
       delete &mutableLinearSortVecContainer;
+      delete &mutableLinearHeapVecContainer;
 
       // --- SortableLinear ---
-      delete &sortableLinearSortVec1Container;
-      delete &sortableLinearSortVec2Container;
+      delete &sortableLinearSortVecContainer;
+      delete &sortableLinearHeapVecContainer;
+
+      // --- Set ---
+      delete &setVec;
+      delete &setLst;
+
+      // --- Heap ---
+      delete &heap1;
+      delete &heap2;
+
+      // --- PQ ---
+      delete &pq1;
+      delete &pq2;
 
       // --- Concrete ---
       delete &list1;
       delete &list2;
-      delete &setVec;
-      delete &setLst;
       delete &vector1;
       delete &vector2;
       delete &setLst1;
@@ -989,6 +1453,10 @@ namespace myT
       delete &setVec2;
       delete &sortableVector1;
       delete &sortableVector2;
+      delete &heapVec1;
+      delete &heapVec2;
+      delete &pqHeap1;
+      delete &pqHeap2;
     }
 
   };
@@ -1502,6 +1970,7 @@ void mytest()
 
     using Box = lasd::SetVec<DataT>;
 
+    globalBox<lasd::List<DataT>>;
     globalBox<Box> = &boxTester.setVec1;
 
     std::cout << globalBox<Box>->Size() << std::endl;
