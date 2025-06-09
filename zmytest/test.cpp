@@ -73,12 +73,28 @@ namespace myT
     std::cout << typeid(box).name();
     std::cout << "----------------------------------------" << std::endl;
 
+    // Insert (copy)
     std::cout << "box.Insert(" << dat << ") == " << (box.Insert(dat) ? "true" : "false") << std::endl;
+    // Insert (move)
+    std::cout << "box.Insert(move(" << dat << ")) == " << (box.Insert(Data(dat)) ? "true" : "false") << std::endl;
+
+    // Remove
     std::cout << "box.Remove(" << dat << ") == " << (box.Remove(dat) ? "true" : "false") << std::endl;
 
+    // InsertAll (Traversable)
     std::cout << "box.InsertAll(toInsert) == " << (box.InsertAll(toInsert) ? "true" : "false") << std::endl;
+    // InsertAll (Mappable, move)
+    std::cout << "box.InsertAll(move(Vector)) == " << (box.InsertAll(lasd::Vector<Data>(toInsert)) ? "true" : "false") << std::endl;
+
+    // RemoveAll
     std::cout << "box.RemoveAll(toInsert) == " << (box.RemoveAll(toInsert) ? "true" : "false") << std::endl;
+
+    // InsertSome (Traversable)
     std::cout << "box.InsertSome(toInsert) == " << (box.InsertSome(toInsert) ? "true" : "false") << std::endl;
+    // InsertSome (Mappable, move)
+    std::cout << "box.InsertSome(move(Vector)) == " << (box.InsertSome(lasd::Vector<Data>(toInsert)) ? "true" : "false") << std::endl;
+
+    // RemoveSome
     std::cout << "box.RemoveSome(toInsert) == " << (box.RemoveSome(toInsert) ? "true" : "false") << std::endl;
   }
 
@@ -312,6 +328,129 @@ namespace myT
     box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
     std::cout << std::endl;
 
+  }
+
+  template <typename Data>
+  void ListsTest(lasd::List<Data>& list)
+  {
+    std::cout << "----------------------------------------ListTest: ";
+    std::cout << typeid(list).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Contents: ";
+    list.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    try {
+      list.InsertAtFront(Data("front_data"));
+      std::cout << "InsertAtFront: OK" << std::endl;
+    } catch (std::length_error& e) { std::cout << "InsertAtFront exception:" << e.what() << std::endl; }
+
+    try {
+      list.InsertAtBack(Data("back_data"));
+      std::cout << "InsertAtBack: OK" << std::endl;
+    } catch (std::length_error& e) { std::cout << "InsertAtFront exception:" << e.what() << std::endl; }
+
+    std::cout << "After InsertAtFront/Back: ";
+    list.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    try {
+      list.RemoveFromFront();
+      std::cout << "RemoveFromFront: OK" << std::endl;
+    } catch (const std::length_error& e) { std::cout << "RemoveFromFront exception: " << e.what() << std::endl; }
+
+    try {
+      list.RemoveFromBack();
+      std::cout << "RemoveFromBack: OK" << std::endl;
+    } catch (const std::length_error& e) { std::cout << "RemoveFromBack exception: " << e.what() << std::endl; }
+
+    std::cout << "After RemoveFromFront/Back: ";
+    list.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    try {
+      std::cout << "FrontNRemove: " << list.FrontNRemove() << std::endl;
+    } catch (const std::length_error& e) { std::cout << "FrontNRemove exception: " << e.what() << std::endl; }
+
+    try {
+      std::cout << "BackNRemove: " << list.BackNRemove() << std::endl;
+    } catch (const std::length_error& e) { std::cout << "BackNRemove exception: " << e.what() << std::endl; }
+
+    std::cout << "After FrontNRemove/BackNRemove: ";
+    list.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+  }
+
+  template <typename Data>
+  void HeapsTest(lasd::Heap<Data>& heap)
+  {
+    std::cout << "----------------------------------------HeapTest: ";
+    std::cout << typeid(heap).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Contents: ";
+    heap.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    std::cout << "IsHeap(): " << (heap.IsHeap() ? "true" : "false") << std::endl;
+
+    std::cout << "Calling Heapify()..." << std::endl;
+    heap.Heapify();
+
+    std::cout << "After Heapify, IsHeap(): " << (heap.IsHeap() ? "true" : "false") << std::endl;
+
+    std::cout << "After Heapify, contents: ";
+    heap.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+  }
+
+  template <typename Data>
+  void PQsTest(lasd::PQ<Data>& pq, const Data& dat, ulong idx)
+  {
+    std::cout << "----------------------------------------PQsTest: ";
+    std::cout << typeid(pq).name();
+    std::cout << "----------------------------------------" << std::endl;
+
+    std::cout << "Contents: ";
+    pq.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    // Tip
+    try { std::cout << "Tip: " << pq.Tip() << std::endl; }
+    catch (const std::length_error& e) { std::cout << "Tip() exception: " << e.what() << std::endl; }
+
+    // RemoveTip
+    try { pq.RemoveTip(); std::cout << "RemoveTip: OK" << std::endl; }
+    catch (const std::length_error& e) { std::cout << "RemoveTip() exception: " << e.what() << std::endl; }
+
+    // TipNRemove
+    try { std::cout << "TipNRemove: " << pq.TipNRemove() << std::endl; }
+    catch (const std::length_error& e) { std::cout << "TipNRemove() exception: " << e.what() << std::endl; }
+
+    // Insert (copy)
+    pq.Insert(dat);
+    std::cout << "After Insert (copy): ";
+    pq.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    // Insert (move)
+    pq.Insert(Data(dat));
+    std::cout << "After Insert (move): ";
+    pq.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
+
+    // Change (copy)
+    try { pq.Change(idx, dat); std::cout << "Change(" << idx << ", copy): OK" << std::endl; }
+    catch (const std::out_of_range& e) { std::cout << "Change() exception: " << e.what() << std::endl; }
+
+    // Change (move)
+    try { pq.Change(idx, Data(dat)); std::cout << "Change(" << idx << ", move): OK" << std::endl; }
+    catch (const std::out_of_range& e) { std::cout << "Change() exception: " << e.what() << std::endl; }
+
+    std::cout << "After Change: ";
+    pq.Traverse([](const Data& dat) { std::cout << dat << ", "; });
+    std::cout << std::endl;
   }
 
   template <typename Data>
@@ -1461,6 +1600,235 @@ namespace myT
 
   };
 
+  template <typename Data>
+  std::ostream& operator<<(std::ostream& os, const BoxRandomTester<Data>& box) {
+    auto printOrBottom = [&os](const auto& cont) {
+      if (cont.Empty())
+        os << "⊥";
+      else
+        cont.Traverse([&os](const Data& dat){ os << dat << " "; });
+      os << std::endl;
+    };
+
+    // Container interfaces
+    os << "\tvectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.vectorContainer));
+    os << "\tlistContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.listContainer));
+    os << "\tsetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.setVecContainer));
+    os << "\tsetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.setLstContainer));
+    os << "\tsortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.sortVecContainer));
+    os << "\tpqHeapContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.pqHeapContainer));
+    os << "\theapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.heapVecContainer));
+
+    // TestableContainer interfaces
+    os << "\ttestableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.testableVectorContainer));
+    os << "\ttestableListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.testableListContainer));
+    os << "\ttestableSetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.testableSetVecContainer));
+    os << "\ttestableSetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.testableSetLstContainer));
+    os << "\ttestableSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.testableSortVecContainer));
+    os << "\ttestablePQHeapContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.testablePQHeapContainer));
+    os << "\ttestableHeapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.testableHeapVecContainer));
+
+    // ClearableContainer interfaces
+    os << "\tclearableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.clearableVectorContainer));
+    os << "\tclearableListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.clearableListContainer));
+    os << "\tclearableSetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.clearableSetVecContainer));
+    os << "\tclearableSetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.clearableSetLstContainer));
+    os << "\tclearablePQHeapContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.clearablePQHeapContainer));
+    os << "\tclearableHeapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.clearableHeapVecContainer));
+
+    // ResizableContainer interfaces
+    os << "\tresizableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.resizableVectorContainer));
+    os << "\tresizableSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.resizableSortVecContainer));
+
+    // DictionaryContainer interfaces
+    os << "\tdictionarySetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.dictionarySetVecContainer));
+    os << "\tdictionarySetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.dictionarySetLstContainer));
+
+    // TraversableContainer interfaces
+    os << "\ttraversableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.traversableVectorContainer));
+    os << "\ttraversableListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.traversableListContainer));
+    os << "\ttraversableSetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.traversableSetVecContainer));
+    os << "\ttraversableSetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.traversableSetLstContainer));
+    os << "\ttraversableSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.traversableSortVecContainer));
+    os << "\ttraversablePQHeapContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.traversablePQHeapContainer));
+    os << "\ttraversableHeapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.traversableHeapVecContainer));
+
+    // OrderedDictionaryContainer interfaces
+    os << "\torderedDictionarySetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.orderedDictionarySetVecContainer));
+    os << "\torderedDictionarySetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.orderedDictionarySetLstContainer));
+
+    // MappableContainer interfaces
+    os << "\tmappableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.mappableVectorContainer));
+    os << "\tmappableListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.mappableListContainer));
+    os << "\tmappableSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.mappableSortVecContainer));
+
+    // PreOrderTraversableContainer interfaces
+    os << "\tpreOrderTraversableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.preOrderTraversableVectorContainer));
+    os << "\tpreOrderTraversableListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.preOrderTraversableListContainer));
+    os << "\tpreOrderTraversableSetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.preOrderTraversableSetVecContainer));
+    os << "\tpreOrderTraversableSetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.preOrderTraversableSetLstContainer));
+    os << "\tpreOrderTraversableSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.preOrderTraversableSortVecContainer));
+    os << "\tpreOrderTraversablePQHeapContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.preOrderTraversablePQHeapContainer));
+    os << "\tpreOrderTraversableHeapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.preOrderTraversableHeapVecContainer));
+
+    // PostOrderTraversableContainer interfaces
+    os << "\tpostOrderTraversableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.postOrderTraversableVectorContainer));
+    os << "\tpostOrderTraversableListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.postOrderTraversableListContainer));
+    os << "\tpostOrderTraversableSetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.postOrderTraversableSetVecContainer));
+    os << "\tpostOrderTraversableSetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.postOrderTraversableSetLstContainer));
+    os << "\tpostOrderTraversableSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.postOrderTraversableSortVecContainer));
+    os << "\tpostOrderTraversablePQHeapContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.postOrderTraversablePQHeapContainer));
+    os << "\tpostOrderTraversableHeapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.postOrderTraversableHeapVecContainer));
+
+    // PreOrderMappableContainer interfaces
+    os << "\tpreOrderMappableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.preOrderMappableVectorContainer));
+    os << "\tpreOrderMappableListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.preOrderMappableListContainer));
+    os << "\tpreOrderMappableSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.preOrderMappableSortVecContainer));
+
+    // PostOrderMappableContainer interfaces
+    os << "\tpostOrderMappableVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.postOrderMappableVectorContainer));
+    os << "\tpostOrderMappableListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.postOrderMappableListContainer));
+    os << "\tpostOrderMappableSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.postOrderMappableSortVecContainer));
+
+    // LinearContainer interfaces
+    os << "\tlinearVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.linearVectorContainer));
+    os << "\tlinearListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.linearListContainer));
+    os << "\tlinearSetVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.linearSetVecContainer));
+    os << "\tlinearSetLstContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.linearSetLstContainer));
+    os << "\tlinearSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.linearSortVecContainer));
+    os << "\tlinearPQHeapContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.linearPQHeapContainer));
+    os << "\tlinearHeapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.linearHeapVecContainer));
+
+    // MutableLinearContainer interfaces
+    os << "\tmutableLinearVectorContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.mutableLinearVectorContainer));
+    os << "\tmutableLinearListContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.mutableLinearListContainer));
+    os << "\tmutableLinearSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.mutableLinearSortVecContainer));
+    os << "\tmutableLinearHeapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.mutableLinearHeapVecContainer));
+
+    // SortableLinearContainer interfaces
+    os << "\tsortableLinearSortVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.sortableLinearSortVecContainer));
+    os << "\tsortableLinearHeapVecContainer: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.sortableLinearHeapVecContainer));
+
+    // Set interfaces
+    os << "\tsetVec: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.setVec));
+    os << "\tsetLst: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.setLst));
+
+    // Heap interfaces
+    os << "\theap1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.heap1));
+    os << "\theap2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.heap2));
+
+    // PQ interfaces
+    os << "\tpq1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.pq1));
+    os << "\tpq2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.pq2));
+
+    // Concrete data structures
+    os << "\tlist1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.list1));
+    os << "\tlist2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::List<Data>&>(box.list2));
+    os << "\tvector1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.vector1));
+    os << "\tvector2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::Vector<Data>&>(box.vector2));
+    os << "\tsetLst1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.setLst1));
+    os << "\tsetLst2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetLst<Data>&>(box.setLst2));
+    os << "\tsetVec1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.setVec1));
+    os << "\tsetVec2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SetVec<Data>&>(box.setVec2));
+    os << "\tsortableVector1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.sortableVector1));
+    os << "\tsortableVector2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::SortableVector<Data>&>(box.sortableVector2));
+    os << "\theapVec1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.heapVec1));
+    os << "\theapVec2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::HeapVec<Data>&>(box.heapVec2));
+    os << "\tpqHeap1: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.pqHeap1));
+    os << "\tpqHeap2: " << std::endl;
+    printOrBottom(dynamic_cast<const lasd::PQHeap<Data>&>(box.pqHeap2));
+
+    return os;
+  }
+
   class MyType
   {
 
@@ -1586,9 +1954,99 @@ namespace myT
   
   // template <typename Data>
   // const time_t BoxRandomTester<Data>::seed = 1749211491;
-  
+
+  std::string randomInRange(const std::string& min, const std::string& max) {
+    
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    // Trova il primo carattere che differisce
+    size_t i = 0;
+    while (i < min.size() && i < max.size() && min[i] == max[i]) ++i;
+
+    std::string result = min.substr(0, i);
+
+    // Se min == max o min > max, ritorna min
+    if (min > max) throw std::invalid_argument("min must be less or equal than max");
+    if (min == max) return min;
+
+    // Se uno dei due è finito, aggiungi un carattere random tra '\0' e max[i]-1 oppure min[i]+1 e 255
+    if (i == min.size() && i < max.size()) {
+        std::uniform_int_distribution<int> dist(0, static_cast<unsigned char>(max[i]) - 1);
+        result += static_cast<char>(dist(gen));
+    } else if (i == max.size() && i < min.size()) {
+        std::uniform_int_distribution<int> dist(static_cast<unsigned char>(min[i]) + 1, 255);
+        result += static_cast<char>(dist(gen));
+    } else if (i < min.size() && i < max.size()) {
+        // Scegli un carattere tra min[i]+1 e max[i]-1 se possibile
+        unsigned char minc = static_cast<unsigned char>(min[i]);
+        unsigned char maxc = static_cast<unsigned char>(max[i]);
+        if (maxc > minc + 1) {
+            std::uniform_int_distribution<int> dist(minc + 1, maxc - 1);
+            result += static_cast<char>(dist(gen));
+        } else {
+            // Non c'è spazio, quindi scegli min o max e aggiungi caratteri random
+            result += min[i];
+            // Aggiungi caratteri random per rendere la stringa > min e < max
+            std::uniform_int_distribution<int> dist('a', 'z');
+            for (size_t j = i + 1; j < std::max(min.size(), max.size()); ++j) {
+                result += static_cast<char>(dist(gen));
+            }
+        }
+    }
+    return result;
+  }
+
+  MyType randomInRange(const MyType& min, const MyType& max) {
+    return MyType(randomInRange(min.buffer, max.buffer));
+  }
+
+  int randomInRange(int min, int max) {
+    if (min > max) throw std::invalid_argument("min must be less or equal than max");
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(min, max);
+    return dist(gen);
+  }
+
+  float randomInRange(float min, float max) {
+    if (min > max) throw std::invalid_argument("min must be less or equal than max");
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist(min, max);
+    return dist(gen);
+  }
+
+  std::string randomOutRange(std::string min, std::string max) {
+    min.back() = min.back() - 1;
+    max.back() = max.back() + 1;
+    return randomInRange(min, max); 
+  }
+
+  MyType randomOutRange(const MyType& min, const MyType& max) {
+    return MyType(randomOutRange(min.buffer, max.buffer));
+  }
+
+  int randomOutRange(int min, int max) {
+    if (min >= max) throw std::invalid_argument("min must be less than max");
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(min + 1, max - 1);
+    return dist(gen);
+  }
+
+  float randomOutRange(float min, float max) {
+    if (min >= max) throw std::invalid_argument("min must be less than max");
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist(min + 0.1f, max - 0.1f);
+    return dist(gen);
+  }
+
   template <typename Data>
-  void Gentest1(const lasd::Vector<Data> &Alphabet){
+  typename lasd::MappableContainer<Data>::MapFun mapF;
+
+  template <typename Data>
+  void Gentest1(const lasd::Set<Data> &Alphabet){
     {
       std::cout << "Testing EmptyBoxes:" << std::endl;
       BoxRandomTester<Data> testBox = myT::EmptyBoxes<Data>();
@@ -1611,163 +2069,103 @@ namespace myT
     }
   
     {
-      std::cout << "\n\nTesting MonoBoxes:" << std::endl;
+      std::cout << "Testing All Interfaces on MonoBoxes:" << std::endl;
       BoxRandomTester<Data> testBox = myT::MonoBoxes<Data>(Alphabet);
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
-      if (std::cin.get() == '1'){
 
-        std::cin.get();
-        std::cout << "\nMonoBoxes generated:" << std::endl;
+      if (std::cin.get() == '1')
+           std::cout << testBox;
 
-        std::cout << "\tvectorContainer: " << std::endl;
-        dynamic_cast<lasd::Vector<Data>&>(testBox.vectorContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tlistContainer: " << std::endl;
-        dynamic_cast<lasd::List<Data>&>(testBox.listContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tsetVecContainer: " << std::endl;
-        dynamic_cast<lasd::SetVec<Data>&>(testBox.setVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tsetLstContainer: " << std::endl;
-        dynamic_cast<lasd::SetLst<Data>&>(testBox.setLstContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tsortVecContainer: " << std::endl;
-        dynamic_cast<lasd::SortableVector<Data>&>(testBox.sortVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableVectorContainer: " << std::endl;
-        dynamic_cast<lasd::Vector<Data>&>(testBox.testableVectorContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableListContainer: " << std::endl;
-        dynamic_cast<lasd::List<Data>&>(testBox.testableListContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableSetVecContainer: " << std::endl;
-        dynamic_cast<lasd::SetVec<Data>&>(testBox.testableSetVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableSetLstContainer: " << std::endl;
-        dynamic_cast<lasd::SetLst<Data>&>(testBox.testableSetLstContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableSortVecContainer: " << std::endl;
-        dynamic_cast<lasd::SortableVector<Data>&>(testBox.testableSortVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tclearableVectorContainer: " << std::endl;
-        dynamic_cast<lasd::Vector<Data>&>(testBox.clearableVectorContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tclearableListContainer: " << std::endl;
-        dynamic_cast<lasd::List<Data>&>(testBox.clearableListContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tclearableSetVecContainer: " << std::endl;
-        dynamic_cast<lasd::SetVec<Data>&>(testBox.clearableSetVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tclearableSetLstContainer: " << std::endl;
-        dynamic_cast<lasd::SetLst<Data>&>(testBox.clearableSetLstContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tresizableVectorContainer: " << std::endl;
-        dynamic_cast<lasd::Vector<Data>&>(testBox.resizableVectorContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tresizableSortVecContainer: " << std::endl;
-        dynamic_cast<lasd::SortableVector<Data>&>(testBox.resizableSortVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-      }
-
+      // 1. ContainersTest
       ContainersTest(testBox.vectorContainer);
       ContainersTest(testBox.listContainer);
       ContainersTest(testBox.sortVecContainer);
       ContainersTest(testBox.setVecContainer);
       ContainersTest(testBox.setLstContainer);
-      TestablesTest(testBox.testableVectorContainer, Alphabet[0]);
-      TestablesTest(testBox.testableListContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSetVecContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSetLstContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSortVecContainer, Alphabet[0]);
+
+      // 2. TestablesTest
+      TestablesTest(testBox.testableVectorContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableListContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSetVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSortVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+
+      // 3. ResizablesTest
+      ResizablesTest(testBox.resizableVectorContainer, 10);
+      ResizablesTest(testBox.resizableSortVecContainer, 10);
+
+      // 4. ClearablesTest
       ClearablesTest(testBox.clearableVectorContainer);
       ClearablesTest(testBox.clearableListContainer);
       ClearablesTest(testBox.clearableSetVecContainer);
       ClearablesTest(testBox.clearableSetLstContainer);
-      ResizablesTest(testBox.resizableVectorContainer, 10);
-      ResizablesTest(testBox.resizableSortVecContainer, 10);
-    }
 
+      // 5. DictionariesTest
+      DictionariesTest(testBox.dictionarySetVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
+      DictionariesTest(testBox.dictionarySetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
+
+      // 6. TraversablesTest
+      TraversablesTest(
+        testBox.traversableVectorContainer,
+        [](const Data& dat){ std::cout << dat << " "; },
+        [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        Alphabet[0]
+      );
+
+      // 7. OrderedDictionariesTest
+      OrderedDictionariesTest(testBox.orderedDictionarySetVecContainer, randomOutRange(testBox.orderedDictionarySetVecContainer.Min(), testBox.orderedDictionarySetVecContainer.Max()));
+      OrderedDictionariesTest(testBox.orderedDictionarySetLstContainer, randomOutRange(testBox.orderedDictionarySetLstContainer.Min(), testBox.orderedDictionarySetLstContainer.Max()));
+
+      // 8. MappablesTest
+      MappablesTest(testBox.mappableVectorContainer, &mapF<Data>);
+
+      // 9. PreOrderTraversablesTest
+      PreOrderTraversablesTest(
+        testBox.preOrderTraversableVectorContainer,
+        [](const Data& dat){ std::cout << dat << " "; },
+        [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        Alphabet[0]
+      );
+
+      // 10. PostOrderTraversablesTest
+      PostOrderTraversablesTest(
+        testBox.postOrderTraversableVectorContainer,
+        [](const Data& dat){ std::cout << dat << " "; },
+        [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        Alphabet[0]
+      );
+
+      // 11. PreOrderMappablesTest
+      PreOrderMappablesTest(testBox.preOrderMappableVectorContainer, [](Data& dat){ dat = Data("pre_" + dat.buffer); });
+
+      // 12. PostOrderMappablesTest
+      PostOrderMappablesTest(testBox.postOrderMappableVectorContainer, [](Data& dat){ dat = Data("post_" + dat.buffer); });
+
+      // 13. LinearsTest
+      LinearsTest(testBox.linearVectorContainer, testBox.linearListContainer, 0);
+
+      // 14. MutableLinearsTest
+      MutableLinearsTest(testBox.mutableLinearVectorContainer, Alphabet[0], Alphabet[1], 0, Alphabet[2]);
+
+      // 15. SortableLinearsTest
+      SortableLinearsTest(testBox.sortableLinearSortVecContainer, 0);
+
+      // 16. ListsTest
+      ListsTest(testBox.list1);
+
+      // 17. HeapsTest
+      HeapsTest(testBox.heap1);
+
+      // 18. PQsTest
+      PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1));
+
+      std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
+
+      if (std::cin.get() == '1')
+           std::cout << testBox;
+    }
+      
     {
       std::cout << "\n\nTesting MultiBoxes:" << std::endl;
       BoxRandomTester<Data> testBox = myT::MultiBoxes<Data>(Alphabet, 10);
@@ -1955,7 +2353,12 @@ void mytest()
       }
     );
   }
-  Gentest1<DataT>(boxTester.vector1);
+  boxTester.setVec2 = lasd::SetVec<DataT>(boxTester.vector1);
+  mapF<DataT> = [](DataT &dat)
+  {
+    dat = DataT("mapped_" + dat.buffer);
+  };
+  Gentest1<DataT>(boxTester.setVec2);
 
   std::cout << "\nvector1 contents: ";
   boxTester.vector1.Map(
