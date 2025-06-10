@@ -49,7 +49,7 @@ bool HeapVec<Data>::operator!=(const HeapVec<Data>& other) const noexcept {
 
 template <typename Data>
 inline bool HeapVec<Data>::IsHeap() const noexcept {
-  if (Size() == 0) return true;
+  if (Size() <= 1) return true; // #TODO corrected: if (Size() == 0) return true; -> if (Size() <= 1) return true;
   ulong max;
   for (ulong i = 0; i < static_cast<ulong>(parent(Size()-1)); ++i) {
         max = GetMax(i, Size()-1);

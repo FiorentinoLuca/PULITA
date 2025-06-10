@@ -296,13 +296,13 @@ namespace myT
     box.Traverse([](const Data& dat) { std::cout << dat << ", "; });
     std::cout << std::endl;
 
-    try { std::cout << "Front() = " << box.Front()=f << std::endl; }
+    try { std::cout << "Front() = " << (box.Front()=f) << std::endl; }
     catch (const std::length_error& e) { std::cout << "Front() exception: " << e.what() << std::endl; }
 
-    try { std::cout << "Back() = " << box.Back()=b << std::endl; }
+    try { std::cout << "Back() = " << (box.Back()=b) << std::endl; }
     catch (const std::length_error& e) { std::cout << "Back() exception: " << e.what() << std::endl; }
 
-    try { std::cout << "operator[](" << idx << ") = " << box[idx]=dat << std::endl; }
+    try { std::cout << "operator[](" << idx << ") = " << (box[idx]=dat) << std::endl; }
     catch (const std::out_of_range& e) { std::cout << "operator[] exception: " << e.what() << std::endl; }
 
     std::cout << "After: ";
@@ -1602,7 +1602,7 @@ namespace myT
 
   template <typename Data>
   std::ostream& operator<<(std::ostream& os, const BoxRandomTester<Data>& box) {
-    auto printOrBottom = [&os](const auto& cont) {
+    auto printOrBottom = [&os](const lasd::TraversableContainer<Data>& cont) {
       if (cont.Empty())
         os << "⊥";
       else
@@ -1953,7 +1953,7 @@ namespace myT
   const time_t BoxRandomTester<Data>::seed = time(nullptr);
   
   // template <typename Data>
-  // const time_t BoxRandomTester<Data>::seed = 1749211491;
+  // const time_t BoxRandomTester<Data>::seed = 1749556776;
 
   std::string randomInRange(const std::string& min, const std::string& max) {
     
@@ -2017,8 +2017,13 @@ namespace myT
   }
 
   std::string randomOutRange(std::string min, std::string max) {
-    min.back() = min.back() - 1;
-    max.back() = max.back() + 1;
+    if (min == max) { std::string tmp = min; 
+      min.back() = tmp.back()-1;
+      max.back() = tmp.back()+1;
+    } else {
+      min.back() = min.back() - 1;
+      max.back() = max.back() + 1;
+    }
     return randomInRange(min, max); 
   }
 
@@ -2027,19 +2032,27 @@ namespace myT
   }
 
   int randomOutRange(int min, int max) {
-    if (min >= max) throw std::invalid_argument("min must be less than max");
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dist(min + 1, max - 1);
-    return dist(gen);
+    if (min == max) {
+      int tmp = min;
+      min = tmp - 1;
+      max = tmp + 1;
+    } else {
+      min += 1;
+      max -= 1;
+    }
+    return randomInRange(min + 1, max - 1);
   }
 
   float randomOutRange(float min, float max) {
-    if (min >= max) throw std::invalid_argument("min must be less than max");
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dist(min + 0.1f, max - 0.1f);
-    return dist(gen);
+    if (min == max) {
+      float tmp = min;
+      min = tmp - 1.25f;
+      max = tmp + 1.25f;
+    } else {
+      min += 1.25f;
+      max -= 1.25f;
+    }
+    return randomInRange(min + 1, max - 1);
   }
 
   template <typename Data>
@@ -2108,8 +2121,10 @@ namespace myT
       // 6. TraversablesTest
       TraversablesTest(
         testBox.traversableVectorContainer,
-        [](const Data& dat){ std::cout << dat << " "; },
-        [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
         Alphabet[0]
       );
 
@@ -2118,29 +2133,39 @@ namespace myT
       OrderedDictionariesTest(testBox.orderedDictionarySetLstContainer, randomOutRange(testBox.orderedDictionarySetLstContainer.Min(), testBox.orderedDictionarySetLstContainer.Max()));
 
       // 8. MappablesTest
-      MappablesTest(testBox.mappableVectorContainer, &mapF<Data>);
+      MappablesTest(testBox.mappableVectorContainer, mapF<Data>);
 
       // 9. PreOrderTraversablesTest
       PreOrderTraversablesTest(
         testBox.preOrderTraversableVectorContainer,
-        [](const Data& dat){ std::cout << dat << " "; },
-        [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
         Alphabet[0]
       );
 
       // 10. PostOrderTraversablesTest
       PostOrderTraversablesTest(
         testBox.postOrderTraversableVectorContainer,
-        [](const Data& dat){ std::cout << dat << " "; },
-        [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
         Alphabet[0]
       );
 
       // 11. PreOrderMappablesTest
-      PreOrderMappablesTest(testBox.preOrderMappableVectorContainer, [](Data& dat){ dat = Data("pre_" + dat.buffer); });
+      PreOrderMappablesTest(testBox.preOrderMappableVectorContainer, 
+        // [](Data& dat){ dat = Data("pre_" + dat.buffer); }
+        std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+      );
 
       // 12. PostOrderMappablesTest
-      PostOrderMappablesTest(testBox.postOrderMappableVectorContainer, [](Data& dat){ dat = Data("post_" + dat.buffer); });
+      PostOrderMappablesTest(testBox.postOrderMappableVectorContainer, 
+        // [](Data& dat){ dat = Data("post_" + dat.buffer); }
+        std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+      );
 
       // 13. LinearsTest
       LinearsTest(testBox.linearVectorContainer, testBox.linearListContainer, 0);

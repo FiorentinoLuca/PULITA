@@ -95,6 +95,7 @@ inline const Data& SetVec<Data>::Min()
 
 template <typename Data>
 inline Data SetVec<Data>::MinNRemove() {
+  if (Empty()) throw std::length_error("Set is empty"); // #TODO corrected: -> if(Empty()) throw std::length_error("SetVec is empty");
   Data& ret = (*this)[0];
   RemoveMin();
   return ret;
@@ -119,6 +120,7 @@ inline const Data& SetVec<Data>::Max()
 template <typename Data>
 inline Data SetVec<Data>::MaxNRemove() 
 {
+  if (Empty()) throw std::length_error("Set is empty"); // #TODO corrected: -> if(Empty()) throw std::length_error("SetVec is empty");
   Data ret = (*this)[numElements - 1];
   RemoveMax();
   return std::move(ret);
@@ -358,7 +360,7 @@ void SetVec<Data>::EnsureCapacity(ulong dim)
       Resize(initialSize);
       return;
     }
-    Resize(static_cast<ulong>(resizingFactor*size));
+    Resize(static_cast<ulong>(std::ceil(resizingFactor*size))); // #TODO corrected: resizingFactor*size -> std::ceil(resizingFactor*size)
     return;
   }
 

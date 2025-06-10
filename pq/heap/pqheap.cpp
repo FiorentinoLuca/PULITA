@@ -161,7 +161,7 @@ void PQHeap<Data>::EnsureCapacity(ulong dim)
       Resize(initialSize);
       return;
     }
-    Resize(static_cast<ulong>(resizingFactor*size));
+    Resize(static_cast<ulong>(std::ceil(resizingFactor*size))); // #TODO corrected: resizingFactor*size -> std::ceil(resizingFactor*size)
     return;
   }
 
