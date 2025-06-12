@@ -164,7 +164,8 @@ typename List<Data>::Node** SetLst<Data>::FindSucc(const Data &dat)
 {
   Node** ret = BSearch(dat);
 
-  if (Empty() || (ret != nullptr && *ret == tail))
+  if (Empty() || *ret == tail) // #TODO  (ret != nullptr && *ret == tail) -> *ret == tail
+
     throw std::length_error("No successor found");
 
   return &(*ret)->next;
@@ -278,20 +279,19 @@ bool SetLst<Data>::Remove(const Data& dat) {
 
   if (foundNode == nullptr || (*foundNode)->key != dat)
                                            return false;
-
-  Node *x = nullptr;
-
+  /* // #TODO 
   if (head == tail) {
     x = head;
     head = nullptr;
     tail = nullptr;
   }
-  else {
+  else { 
+
     if (pPred == nullptr) {
       x = head;
       head = head->next;
     }
-    else {
+    else { 
       if (*pPred == tail) {
         List<Data>::RemoveFromBack();
         return true;
@@ -306,11 +306,22 @@ bool SetLst<Data>::Remove(const Data& dat) {
       }
     }
   }
+  */
+
+  if (*foundNode == head) {
+    RemoveFromFront();
+    return true;
+  }
+  if (*foundNode == tail) 
+           tail = *pPred;
+  Node *x = *foundNode;
+  (*foundNode) = (*foundNode)->next;
 
   delete x;
   size--;
   
   return true;
+
 }
 
 template <typename Data>

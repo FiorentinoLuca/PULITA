@@ -143,7 +143,7 @@ protected:
 
         mid = Reach<Derived, Out>(left, card(1, (delta>>1) - 1), pPred2Nxt);
         if(getData<Derived, Out>(mid) == dat)
-                                                return mid;
+                                  return mid;
 
         if (getData<Derived, Out>(mid)>dat)
         {

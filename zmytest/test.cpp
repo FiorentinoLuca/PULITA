@@ -1949,11 +1949,12 @@ namespace myT
   
   using DataT = MyType;
   
-  template <typename Data>
-  const time_t BoxRandomTester<Data>::seed = time(nullptr);
-  
   // template <typename Data>
-  // const time_t BoxRandomTester<Data>::seed = 1749556776;
+  // const time_t BoxRandomTester<Data>::seed = time(nullptr);
+  
+  template <typename Data>
+  const time_t BoxRandomTester<Data>::seed = 1749690469;
+  // 1749690572 (segfault)
 
   std::string randomInRange(const std::string& min, const std::string& max) {
     
@@ -2060,35 +2061,140 @@ namespace myT
 
   template <typename Data>
   void Gentest1(const lasd::Set<Data> &Alphabet){
+
     {
-      std::cout << "Testing EmptyBoxes:" << std::endl;
+      std::cout << "Testing All Interfaces on EmptyBoxes:" << std::endl;
       BoxRandomTester<Data> testBox = myT::EmptyBoxes<Data>();
+
+      std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
+
+      { 
+      std::string &&ans = string();
+      std::cin >> ans;
+      if (ans == "1") 
+        std::cout << testBox;
+      }
+
+      // 1. ContainersTest
       ContainersTest(testBox.vectorContainer);
       ContainersTest(testBox.listContainer);
       ContainersTest(testBox.sortVecContainer);
       ContainersTest(testBox.setVecContainer);
       ContainersTest(testBox.setLstContainer);
-      TestablesTest(testBox.testableVectorContainer, Alphabet[0]);
-      TestablesTest(testBox.testableListContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSetVecContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSetLstContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSortVecContainer, Alphabet[0]);
+
+      // 2. TestablesTest
+      TestablesTest(testBox.testableVectorContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableListContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSetVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSortVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+
+      // 3. ResizablesTest
+      ResizablesTest(testBox.resizableVectorContainer, 10);
+      ResizablesTest(testBox.resizableSortVecContainer, 10);
+
+      // 4. ClearablesTest
       ClearablesTest(testBox.clearableVectorContainer);
       ClearablesTest(testBox.clearableListContainer);
       ClearablesTest(testBox.clearableSetVecContainer);
       ClearablesTest(testBox.clearableSetLstContainer);
-      ResizablesTest(testBox.resizableVectorContainer, 10);
-      ResizablesTest(testBox.resizableSortVecContainer, 10);
+
+      // 5. DictionariesTest
+      DictionariesTest(testBox.dictionarySetVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
+      DictionariesTest(testBox.dictionarySetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
+
+      // 6. TraversablesTest
+      TraversablesTest(
+        testBox.traversableVectorContainer,
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        Alphabet[0]
+      );
+
+      // 7. OrderedDictionariesTest
+      try { OrderedDictionariesTest(testBox.orderedDictionarySetVecContainer, randomOutRange(testBox.orderedDictionarySetVecContainer.Min(), testBox.orderedDictionarySetVecContainer.Max())); }
+      catch(std::exception &e) { std::cout << "OrderedDictionariesTest exception: " << e.what() << std::endl; }
+      try { OrderedDictionariesTest(testBox.orderedDictionarySetLstContainer, randomOutRange(testBox.orderedDictionarySetLstContainer.Min(), testBox.orderedDictionarySetLstContainer.Max())); }
+      catch(std::exception &e) { std::cout << "OrderedDictionariesTest exception: " << e.what() << std::endl; }
+      
+      // 8. MappablesTest
+      MappablesTest(testBox.mappableVectorContainer, mapF<Data>);
+
+      // 9. PreOrderTraversablesTest
+      PreOrderTraversablesTest(
+        testBox.preOrderTraversableVectorContainer,
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        Alphabet[0]
+      );
+
+      // 10. PostOrderTraversablesTest
+      PostOrderTraversablesTest(
+        testBox.postOrderTraversableVectorContainer,
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        Alphabet[0]
+      );
+
+      // 11. PreOrderMappablesTest
+      PreOrderMappablesTest(testBox.preOrderMappableVectorContainer, 
+        // [](Data& dat){ dat = Data("pre_" + dat.buffer); }
+        std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+      );
+
+      // 12. PostOrderMappablesTest
+      PostOrderMappablesTest(testBox.postOrderMappableVectorContainer, 
+        // [](Data& dat){ dat = Data("post_" + dat.buffer); }
+        std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+      );
+
+      // 13. LinearsTest
+      LinearsTest(testBox.linearVectorContainer, testBox.linearListContainer, 0);
+
+      // 14. MutableLinearsTest
+      MutableLinearsTest(testBox.mutableLinearVectorContainer, Alphabet[0], Alphabet[1], 0, Alphabet[2]);
+
+      // 15. SortableLinearsTest
+      SortableLinearsTest(testBox.sortableLinearSortVecContainer, 0);
+
+      // 16. ListsTest
+      ListsTest(testBox.list1);
+
+      // 17. HeapsTest
+      HeapsTest(testBox.heap1);
+
+      // 18. PQsTest
+      try { PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1)); }
+      catch(std::exception &e) { std::cout << "PQsTest exception: " << e.what() << std::endl; }
+
+      std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
+
+      { 
+      std::string &&ans = string();
+      std::cin >> ans;
+      if (ans == "1") 
+        std::cout << testBox;
+      }
     }
-  
+
     {
       std::cout << "Testing All Interfaces on MonoBoxes:" << std::endl;
       BoxRandomTester<Data> testBox = myT::MonoBoxes<Data>(Alphabet);
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
 
-      if (std::cin.get() == '1')
-           std::cout << testBox;
+      { 
+      std::string &&ans = string();
+      std::cin >> ans;
+      if (ans == "1") 
+        std::cout << testBox;
+      }
 
       // 1. ContainersTest
       ContainersTest(testBox.vectorContainer);
@@ -2187,168 +2293,132 @@ namespace myT
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
 
-      if (std::cin.get() == '1')
-           std::cout << testBox;
+      { 
+      std::string &&ans = string();
+      std::cin >> ans;
+      if (ans == "1") 
+        std::cout << testBox;
+      }
     }
       
     {
-      std::cout << "\n\nTesting MultiBoxes:" << std::endl;
-      BoxRandomTester<Data> testBox = myT::MultiBoxes<Data>(Alphabet, 10);
+      std::cout << "Testing All Interfaces on MultiBoxes:" << std::endl;
+      BoxRandomTester<Data> testBox = myT::MultiBoxes<Data>(Alphabet, 20);
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
-      if (std::cin.get() == '1'){
 
-        std::cin.get();
-        std::cout << "\nMultiBoxes generated:" << std::endl;
-
-        std::cout << "\tvectorContainer: " << std::endl;
-        dynamic_cast<lasd::Vector<Data>&>(testBox.vectorContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tlistContainer: " << std::endl;
-        dynamic_cast<lasd::List<Data>&>(testBox.listContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tsetVecContainer: " << std::endl;
-        dynamic_cast<lasd::SetVec<Data>&>(testBox.setVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tsetLstContainer: " << std::endl;
-        dynamic_cast<lasd::SetLst<Data>&>(testBox.setLstContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tsortVecContainer: " << std::endl;
-        dynamic_cast<lasd::SortableVector<Data>&>(testBox.sortVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableVectorContainer: " << std::endl;
-        dynamic_cast<lasd::Vector<Data>&>(testBox.testableVectorContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableListContainer: " << std::endl;
-        dynamic_cast<lasd::List<Data>&>(testBox.testableListContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableSetVecContainer: " << std::endl;
-        dynamic_cast<lasd::SetVec<Data>&>(testBox.testableSetVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableSetLstContainer: " << std::endl;
-        dynamic_cast<lasd::SetLst<Data>&>(testBox.testableSetLstContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\ttestableSortVecContainer: " << std::endl;
-        dynamic_cast<lasd::SortableVector<Data>&>(testBox.testableSortVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tclearableVectorContainer: " << std::endl;
-        dynamic_cast<lasd::Vector<Data>&>(testBox.clearableVectorContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tclearableListContainer: " << std::endl;
-        dynamic_cast<lasd::List<Data>&>(testBox.clearableListContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tclearableSetVecContainer: " << std::endl;
-        dynamic_cast<lasd::SetVec<Data>&>(testBox.clearableSetVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tclearableSetLstContainer: " << std::endl;
-        dynamic_cast<lasd::SetLst<Data>&>(testBox.clearableSetLstContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tresizableVectorContainer: " << std::endl;
-        dynamic_cast<lasd::Vector<Data>&>(testBox.resizableVectorContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
-        std::cout << "\tresizableSortVecContainer: " << std::endl;
-        dynamic_cast<lasd::SortableVector<Data>&>(testBox.resizableSortVecContainer).Traverse(
-          [](const Data &dat)
-          {
-            std::cout << dat << " ";
-          }
-        ); std::cout << std::endl;
-
+      { 
+      std::string &&ans = string();
+      std::cin >> ans;
+      if (ans == "1") 
+        std::cout << testBox;
       }
 
+      // 1. ContainersTest
       ContainersTest(testBox.vectorContainer);
       ContainersTest(testBox.listContainer);
       ContainersTest(testBox.sortVecContainer);
       ContainersTest(testBox.setVecContainer);
       ContainersTest(testBox.setLstContainer);
-      TestablesTest(testBox.testableVectorContainer, Alphabet[0]);
-      TestablesTest(testBox.testableListContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSetVecContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSetLstContainer, Alphabet[0]);
-      TestablesTest(testBox.testableSortVecContainer, Alphabet[0]);
+
+      // 2. TestablesTest
+      TestablesTest(testBox.testableVectorContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableListContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSetVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+      TestablesTest(testBox.testableSortVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()));
+
+      // 3. ResizablesTest
+      ResizablesTest(testBox.resizableVectorContainer, 10);
+      ResizablesTest(testBox.resizableSortVecContainer, 10);
+
+      // 4. ClearablesTest
       ClearablesTest(testBox.clearableVectorContainer);
       ClearablesTest(testBox.clearableListContainer);
       ClearablesTest(testBox.clearableSetVecContainer);
       ClearablesTest(testBox.clearableSetLstContainer);
-      ResizablesTest(testBox.resizableVectorContainer, 5);
-      ResizablesTest(testBox.resizableSortVecContainer, 5);
-    }
 
+      // 5. DictionariesTest
+      DictionariesTest(testBox.dictionarySetVecContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
+      DictionariesTest(testBox.dictionarySetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
+
+      // 6. TraversablesTest
+      TraversablesTest(
+        testBox.traversableVectorContainer,
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        Alphabet[0]
+      );
+
+      // 7. OrderedDictionariesTest
+      OrderedDictionariesTest(testBox.orderedDictionarySetVecContainer, randomOutRange(testBox.orderedDictionarySetVecContainer.Min(), testBox.orderedDictionarySetVecContainer.Max()));
+      OrderedDictionariesTest(testBox.orderedDictionarySetLstContainer, randomOutRange(testBox.orderedDictionarySetLstContainer.Min(), testBox.orderedDictionarySetLstContainer.Max()));
+
+      // 8. MappablesTest
+      MappablesTest(testBox.mappableVectorContainer, mapF<Data>);
+
+      // 9. PreOrderTraversablesTest
+      PreOrderTraversablesTest(
+        testBox.preOrderTraversableVectorContainer,
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        Alphabet[0]
+      );
+
+      // 10. PostOrderTraversablesTest
+      PostOrderTraversablesTest(
+        testBox.postOrderTraversableVectorContainer,
+        // [](const Data& dat){ std::cout << dat << " "; },
+        // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
+        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        Alphabet[0]
+      );
+
+      // 11. PreOrderMappablesTest
+      PreOrderMappablesTest(testBox.preOrderMappableVectorContainer, 
+        // [](Data& dat){ dat = Data("pre_" + dat.buffer); }
+        std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+      );
+
+      // 12. PostOrderMappablesTest
+      PostOrderMappablesTest(testBox.postOrderMappableVectorContainer, 
+        // [](Data& dat){ dat = Data("post_" + dat.buffer); }
+        std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+      );
+
+      // 13. LinearsTest
+      LinearsTest(testBox.linearVectorContainer, testBox.linearListContainer, 0);
+
+      // 14. MutableLinearsTest
+      MutableLinearsTest(testBox.mutableLinearVectorContainer, Alphabet[0], Alphabet[1], 0, Alphabet[2]);
+
+      // 15. SortableLinearsTest
+      SortableLinearsTest(testBox.sortableLinearSortVecContainer, 0);
+
+      // 16. ListsTest
+      ListsTest(testBox.list1);
+
+      // 17. HeapsTest
+      HeapsTest(testBox.heap1);
+
+      // 18. PQsTest
+      PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1));
+
+      std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
+
+      { 
+      std::string &&ans = string();
+      std::cin >> ans;
+      if (ans == "1") 
+        std::cout << testBox;
+      }
+    }
+ 
   }
 
 } // namespace myT

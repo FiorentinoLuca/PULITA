@@ -128,6 +128,8 @@ protected:
 
   using List<Data>::head;
   using List<Data>::tail;
+  using List<Data>::RemoveFromFront; // #TODO -> using List<Data>::RemoveFromFront;
+  using typename List<Data>::Node; // #TODO -> using typename List<Data>::Node;
 
   using Node = typename List<Data>::Node;
   const Data& getData(typename List<Data>::Node**) const;
