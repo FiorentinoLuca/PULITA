@@ -1606,7 +1606,7 @@ namespace myT
       if (cont.Empty())
         os << "⊥";
       else
-        cont.Traverse([&os](const Data& dat){ os << dat << " "; });
+        cont.Traverse([&os](const Data& dat){ os << dat << ", "; });
       os << std::endl;
     };
 
@@ -1949,12 +1949,11 @@ namespace myT
   
   using DataT = MyType;
   
-  // template <typename Data>
-  // const time_t BoxRandomTester<Data>::seed = time(nullptr);
-  
   template <typename Data>
-  const time_t BoxRandomTester<Data>::seed = 1749690469;
-  // 1749690572 (segfault)
+  const time_t BoxRandomTester<Data>::seed = time(nullptr);
+  
+  // template <typename Data>
+  // const time_t BoxRandomTester<Data>::seed = 1749766619;
 
   std::string randomInRange(const std::string& min, const std::string& max) {
     
@@ -2041,7 +2040,7 @@ namespace myT
       min += 1;
       max -= 1;
     }
-    return randomInRange(min + 1, max - 1);
+    return randomInRange(min - 1, max + 1);
   }
 
   float randomOutRange(float min, float max) {
@@ -2053,11 +2052,14 @@ namespace myT
       min += 1.25f;
       max -= 1.25f;
     }
-    return randomInRange(min + 1, max - 1);
+    return randomInRange(min - 1, max + 1);
   }
 
   template <typename Data>
   typename lasd::MappableContainer<Data>::MapFun mapF;
+
+  template <typename Data>
+  typename lasd::MappableContainer<Data>::TraverseFun travF;
 
   template <typename Data>
   void Gentest1(const lasd::Set<Data> &Alphabet){
@@ -2067,13 +2069,16 @@ namespace myT
       BoxRandomTester<Data> testBox = myT::EmptyBoxes<Data>();
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
-
-      { 
-      std::string &&ans = string();
-      std::cin >> ans;
-      if (ans == "1") 
-        std::cout << testBox;
+      {
+        std::string ans;
+        std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+        if (ans == "1") {
+          std::cout << testBox;
+          std::cout << "Press Enter to continue..." << std::endl;
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
       }
+      std::cout << "Random seed: " << BoxRandomTester<DataT>::seed << std::endl;
 
       // 1. ContainersTest
       ContainersTest(testBox.vectorContainer);
@@ -2174,12 +2179,14 @@ namespace myT
       catch(std::exception &e) { std::cout << "PQsTest exception: " << e.what() << std::endl; }
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
-
-      { 
-      std::string &&ans = string();
-      std::cin >> ans;
-      if (ans == "1") 
-        std::cout << testBox;
+      {
+        std::string ans;
+        std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+        if (ans == "1") {
+          std::cout << testBox;
+          std::cout << "Press Enter to continue..." << std::endl;
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
       }
     }
 
@@ -2188,13 +2195,16 @@ namespace myT
       BoxRandomTester<Data> testBox = myT::MonoBoxes<Data>(Alphabet);
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
-
-      { 
-      std::string &&ans = string();
-      std::cin >> ans;
-      if (ans == "1") 
-        std::cout << testBox;
+      {
+        std::string ans;
+        std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+        if (ans == "1") {
+          std::cout << testBox;
+          std::cout << "Press Enter to continue..." << std::endl;
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
       }
+      std::cout << "Random seed: " << BoxRandomTester<DataT>::seed << std::endl;
 
       // 1. ContainersTest
       ContainersTest(testBox.vectorContainer);
@@ -2292,12 +2302,14 @@ namespace myT
       PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1));
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
-
-      { 
-      std::string &&ans = string();
-      std::cin >> ans;
-      if (ans == "1") 
-        std::cout << testBox;
+      {
+        std::string ans;
+        std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+        if (ans == "1") {
+          std::cout << testBox;
+          std::cout << "Press Enter to continue..." << std::endl;
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
       }
     }
       
@@ -2306,13 +2318,16 @@ namespace myT
       BoxRandomTester<Data> testBox = myT::MultiBoxes<Data>(Alphabet, 20);
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
-
-      { 
-      std::string &&ans = string();
-      std::cin >> ans;
-      if (ans == "1") 
-        std::cout << testBox;
+      {
+        std::string ans;
+        std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+        if (ans == "1") {
+          std::cout << testBox;
+          std::cout << "Press Enter to continue..." << std::endl;
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
       }
+      std::cout << "Random seed: " << BoxRandomTester<DataT>::seed << std::endl;
 
       // 1. ContainersTest
       ContainersTest(testBox.vectorContainer);
@@ -2410,12 +2425,14 @@ namespace myT
       PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1));
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
-
-      { 
-      std::string &&ans = string();
-      std::cin >> ans;
-      if (ans == "1") 
-        std::cout << testBox;
+      {
+        std::string ans;
+        std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+        if (ans == "1") {
+          std::cout << testBox;
+          std::cout << "Press Enter to continue..." << std::endl;
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
       }
     }
  
@@ -2453,6 +2470,7 @@ void mytest()
   {
     dat = DataT("mapped_" + dat.buffer);
   };
+
   Gentest1<DataT>(boxTester.setVec2);
 
   std::cout << "\nvector1 contents: ";

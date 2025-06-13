@@ -164,10 +164,12 @@ typename List<Data>::Node** SetLst<Data>::FindSucc(const Data &dat)
 {
   Node** ret = BSearch(dat);
 
-  if (Empty() || *ret == tail) // #TODO  (ret != nullptr && *ret == tail) -> *ret == tail
-
+  if (Empty() || (ret != nullptr && *ret == tail))
     throw std::length_error("No successor found");
 
+  if (ret == nullptr) // #TODO
+        return &head; //
+        
   return &(*ret)->next;
 }
 
@@ -175,8 +177,9 @@ template <typename Data>
 inline const Data& SetLst<Data>::Successor(const Data& dat)
   const {
     Node** pSucc2Nxt = const_cast<SetLst<Data>*>(this)->FindSucc(dat);
-    if (pSucc2Nxt == nullptr)
-      pSucc2Nxt = &const_cast<SetLst<Data>*>(this)->head;
+    // if (pSucc2Nxt == nullptr)
+    //   pSucc2Nxt = &const_cast<SetLst<Data>*>(this)->head;
+    // #TODO ->
   return (*pSucc2Nxt)->key;
 }
 
