@@ -24,6 +24,26 @@ using namespace std;
 namespace myT
 {
 
+  #define NUM_OF_CONTAINER 7
+  #define NUM_OF_CLEARABLE 7
+  #define NUM_OF_RESIZABLE 2
+  #define NUM_OF_TESTABLE 7
+  #define NUM_OF_TRAVERSABLE 7
+  #define NUM_OF_MAPPABLE 3
+  #define NUM_OF_DICTIONARY 2
+  #define NUM_OF_ORDERED_DICTIONARY 2
+  #define NUM_OF_LINEAR 7
+  #define NUM_OF_MUTABLE_LINEAR 4
+  #define NUM_OF_SORTABLE_LINEAR 2
+  #define NUM_OF_VECTOR 2
+  #define NUM_OF_SORTABLE_VECTOR 1
+  #define NUM_OF_LIST 1
+  #define NUM_OF_SET 2
+  #define NUM_OF_SET_VEC 1
+  #define NUM_OF_SET_LST 1
+  #define NUM_OF_HEAP 1
+  #define NUM_OF_PQ 1
+
   void ContainersTest(lasd::Container &box)
   {
     std::cout << "----------------------------------------ContainersTest: ";
@@ -98,11 +118,11 @@ namespace myT
     std::cout << "box.RemoveSome(toInsert) == " << (box.RemoveSome(toInsert) ? "true" : "false") << std::endl;
   }
 
-  template <typename Data>
+  template <typename Data, typename Accumulator>
   void TraversablesTest(lasd::TraversableContainer<Data> &box,
     std::function<void(const Data &)> visitfun,
-    std::function<Data(const Data &, const Data &)> foldfun,
-    Data init) {
+    std::function<Accumulator(const Data &, const Accumulator &)> foldfun,
+    const Accumulator& init) {
       
       std::cout << "----------------------------------------TraversablesTest: ";
       std::cout << typeid(box).name();
@@ -178,12 +198,12 @@ namespace myT
     std::cout << std::endl;
   }
 
-  template <typename Data>
+  template <typename Data, typename Accumulator>
   void PreOrderTraversablesTest(
     lasd::PreOrderTraversableContainer<Data> &box,
     std::function<void(const Data &)> visitfun,
-    std::function<Data(const Data &, const Data &)> foldfun,
-    Data init) {
+    std::function<Accumulator(const Data &, const Accumulator &)> foldfun,
+    const Accumulator& init) {
       std::cout << "----------------------------------------PreOrderTraversablesTest: ";
       std::cout << typeid(box).name();
       std::cout << "----------------------------------------" << std::endl;
@@ -199,12 +219,12 @@ namespace myT
       std::cout << box.Fold(foldfun, init) << std::endl;
   }
   
-  template <typename Data>
+  template <typename Data, typename Accumulator>
   void PostOrderTraversablesTest(
     lasd::PostOrderTraversableContainer<Data> &box,
     std::function<void(const Data &)> visitfun,
-    std::function<Data(const Data &, const Data &)> foldfun,
-    Data init) {
+    std::function<Accumulator(const Data &, const Accumulator &)> foldfun,
+    const Accumulator& init) {
 
       std::cout << "----------------------------------------PostOrderTraversablesTest: ";
       std::cout << typeid(box).name();
@@ -312,7 +332,7 @@ namespace myT
   }
 
   template <typename Data>
-  void SortableLinearsTest(lasd::SortableLinearContainer<Data>& box, ulong idx)
+  void SortableLinearsTest(lasd::SortableLinearContainer<Data>& box)
   {
     std::cout << "----------------------------------------SortableLinearsTest: ";
     std::cout << typeid(box).name();
@@ -2056,10 +2076,13 @@ namespace myT
   }
 
   template <typename Data>
-  typename lasd::MappableContainer<Data>::MapFun mapF;
+  typename lasd::TraversableContainer<Data>::TraverseFun travF;
+
+  template <typename Data, typename Accumulator>
+  typename lasd::TraversableContainer<Data>::FoldFun<Accumulator> foldF;
 
   template <typename Data>
-  typename lasd::MappableContainer<Data>::TraverseFun travF;
+  typename lasd::MappableContainer<Data>::MapFun mapF;
 
   template <typename Data>
   void Gentest1(const lasd::Set<Data> &Alphabet){
@@ -2109,13 +2132,38 @@ namespace myT
       DictionariesTest(testBox.dictionarySetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
 
       // 6. TraversablesTest
-      TraversablesTest(
-        testBox.traversableVectorContainer,
+      lasd::TraversableContainer<Data>* localTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::TraversableContainer<Data>*> tmp = {
+          &testBox.traversableVectorContainer,
+          &testBox.traversableListContainer,
+          &testBox.traversableSetVecContainer,
+          &testBox.traversableSetLstContainer,
+          &testBox.traversableSortVecContainer,
+          &testBox.traversablePQHeapContainer,
+          &testBox.traversableHeapVecContainer,
+          &testBox.traversableVectorContainer,
+          &testBox.traversableListContainer,
+          &testBox.traversableSetVecContainer,
+          &testBox.traversableSetLstContainer,
+          &testBox.traversableSortVecContainer,
+          &testBox.traversablePQHeapContainer,
+          &testBox.traversableHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localTraversables[i] = std::move(tmp[i]);
+        }
+      }
+      TraversablesTest<Data, int>(
+        *localTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 7. OrderedDictionariesTest
@@ -2125,48 +2173,201 @@ namespace myT
       catch(std::exception &e) { std::cout << "OrderedDictionariesTest exception: " << e.what() << std::endl; }
       
       // 8. MappablesTest
-      MappablesTest(testBox.mappableVectorContainer, mapF<Data>);
+      lasd::MappableContainer<Data>* localMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::MappableContainer<Data>*> tmp = {
+          &testBox.mappableVectorContainer,
+          &testBox.mappableListContainer,
+          &testBox.mappableSortVecContainer,
+          &testBox.mappableVectorContainer,
+          &testBox.mappableListContainer,
+          &testBox.mappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localMappables[i] = std::move(tmp[i]);
+        }
+      }
+      MappablesTest(*localMappables[0], mapF<Data>);
 
       // 9. PreOrderTraversablesTest
+      lasd::PreOrderTraversableContainer<Data>* localPreOrderTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::PreOrderTraversableContainer<Data>*> tmp = {
+          &testBox.preOrderTraversableVectorContainer,
+          &testBox.preOrderTraversableListContainer,
+          &testBox.preOrderTraversableSetVecContainer,
+          &testBox.preOrderTraversableSetLstContainer,
+          &testBox.preOrderTraversableSortVecContainer,
+          &testBox.preOrderTraversablePQHeapContainer,
+          &testBox.preOrderTraversableHeapVecContainer,
+          &testBox.preOrderTraversableVectorContainer,
+          &testBox.preOrderTraversableListContainer,
+          &testBox.preOrderTraversableSetVecContainer,
+          &testBox.preOrderTraversableSetLstContainer,
+          &testBox.preOrderTraversableSortVecContainer,
+          &testBox.preOrderTraversablePQHeapContainer,
+          &testBox.preOrderTraversableHeapVecContainer
+        };
+
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localPreOrderTraversables[i] = std::move(tmp[i]);
+        }
+      }
       PreOrderTraversablesTest(
-        testBox.preOrderTraversableVectorContainer,
+        *localPreOrderTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 10. PostOrderTraversablesTest
+      lasd::PostOrderTraversableContainer<Data>* localPostOrderTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::PostOrderTraversableContainer<Data>*> tmp = {
+          &testBox.postOrderTraversableVectorContainer,
+          &testBox.postOrderTraversableListContainer,
+          &testBox.postOrderTraversableSetVecContainer,
+          &testBox.postOrderTraversableSetLstContainer,
+          &testBox.postOrderTraversableSortVecContainer,
+          &testBox.postOrderTraversablePQHeapContainer,
+          &testBox.postOrderTraversableHeapVecContainer,
+          &testBox.postOrderTraversableVectorContainer,
+          &testBox.postOrderTraversableListContainer,
+          &testBox.postOrderTraversableSetVecContainer,
+          &testBox.postOrderTraversableSetLstContainer,
+          &testBox.postOrderTraversableSortVecContainer,
+          &testBox.postOrderTraversablePQHeapContainer,
+          &testBox.postOrderTraversableHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localPostOrderTraversables[i] = std::move(tmp[i]);
+        }
+      }
       PostOrderTraversablesTest(
-        testBox.postOrderTraversableVectorContainer,
+        *localPostOrderTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 11. PreOrderMappablesTest
-      PreOrderMappablesTest(testBox.preOrderMappableVectorContainer, 
+      lasd::PreOrderMappableContainer<Data>* localPreOrderMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::PreOrderMappableContainer<Data>*> tmp = {
+          &testBox.preOrderMappableVectorContainer,
+          &testBox.preOrderMappableListContainer,
+          &testBox.preOrderMappableSortVecContainer,
+          &testBox.preOrderMappableVectorContainer,
+          &testBox.preOrderMappableListContainer,
+          &testBox.preOrderMappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localPreOrderMappables[i] = std::move(tmp[i]);
+        }
+      }
+      PreOrderMappablesTest(
+        *localPreOrderMappables[0], 
         // [](Data& dat){ dat = Data("pre_" + dat.buffer); }
-        std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+        // std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+        mapF<Data>
       );
 
       // 12. PostOrderMappablesTest
-      PostOrderMappablesTest(testBox.postOrderMappableVectorContainer, 
+      lasd::PostOrderMappableContainer<Data>* localPostOrderMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::PostOrderMappableContainer<Data>*> tmp = {
+          &testBox.postOrderMappableVectorContainer,
+          &testBox.postOrderMappableListContainer,
+          &testBox.postOrderMappableSortVecContainer,
+          &testBox.postOrderMappableVectorContainer,
+          &testBox.postOrderMappableListContainer,
+          &testBox.postOrderMappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localPostOrderMappables[i] = std::move(tmp[i]);
+        }
+      }
+      PostOrderMappablesTest(
+        *localPostOrderMappables[0], 
         // [](Data& dat){ dat = Data("post_" + dat.buffer); }
-        std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+        // std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+        mapF<Data>
       );
 
       // 13. LinearsTest
-      LinearsTest(testBox.linearVectorContainer, testBox.linearListContainer, 0);
+      lasd::LinearContainer<Data>* localLinears[NUM_OF_LINEAR];
+      {
+        std::vector<lasd::LinearContainer<Data>*> tmp = {
+          &testBox.linearVectorContainer,
+          &testBox.linearListContainer,
+          &testBox.linearSetVecContainer,
+          &testBox.linearSetLstContainer,
+          &testBox.linearSortVecContainer,
+          &testBox.linearPQHeapContainer,
+          &testBox.linearHeapVecContainer,
+          &testBox.linearVectorContainer,
+          &testBox.linearListContainer,
+          &testBox.linearSetVecContainer,
+          &testBox.linearSetLstContainer,
+          &testBox.linearSortVecContainer,
+          &testBox.linearPQHeapContainer,
+          &testBox.linearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+          localLinears[i] = std::move(tmp[i]);
+        }
+      }
+      LinearsTest(*localLinears[0], *localLinears[NUM_OF_LINEAR-1], randomOutRange(0, std::max(0, static_cast<int>(std::min((*localLinears[0]).Size()-1, (*localLinears[NUM_OF_LINEAR-1]).Size()-1)))));
 
       // 14. MutableLinearsTest
-      MutableLinearsTest(testBox.mutableLinearVectorContainer, Alphabet[0], Alphabet[1], 0, Alphabet[2]);
+      lasd::MutableLinearContainer<Data>* localMutableLinears[NUM_OF_MUTABLE_LINEAR];
+      {
+        std::vector<lasd::MutableLinearContainer<Data>*> tmp = {
+          &testBox.mutableLinearVectorContainer,
+          &testBox.mutableLinearListContainer,
+          &testBox.mutableLinearSortVecContainer,
+          &testBox.mutableLinearHeapVecContainer,
+          &testBox.mutableLinearVectorContainer,
+          &testBox.mutableLinearListContainer,
+          &testBox.mutableLinearSortVecContainer,
+          &testBox.mutableLinearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+          localMutableLinears[i] = std::move(tmp[i]);
+        }
+      }
+      MutableLinearsTest(*localMutableLinears[0], Alphabet[0], Alphabet[Alphabet.Size()-1], randomOutRange(0, std::max(0, static_cast<int>(std::min((*localLinears[0]).Size()-1, (*localLinears[NUM_OF_LINEAR-1]).Size()-1)))), Alphabet[randomInRange(0, Alphabet.Size()-1)]);
 
       // 15. SortableLinearsTest
-      SortableLinearsTest(testBox.sortableLinearSortVecContainer, 0);
+      lasd::SortableLinearContainer<Data>* localSortableLinears[NUM_OF_SORTABLE_LINEAR];
+      {
+        std::vector<lasd::SortableLinearContainer<Data>*> tmp = {
+          &testBox.sortableLinearSortVecContainer,
+          &testBox.sortableLinearHeapVecContainer,
+          &testBox.sortableLinearSortVecContainer,
+          &testBox.sortableLinearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_SORTABLE_LINEAR; ++i) {
+          localSortableLinears[i] = std::move(tmp[i]);
+        }
+      }
+      SortableLinearsTest(*localSortableLinears[0]);
 
       // 16. ListsTest
       ListsTest(testBox.list1);
@@ -2235,62 +2436,242 @@ namespace myT
       DictionariesTest(testBox.dictionarySetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
 
       // 6. TraversablesTest
-      TraversablesTest(
-        testBox.traversableVectorContainer,
+      lasd::TraversableContainer<Data>* localTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::TraversableContainer<Data>*> tmp = {
+          &testBox.traversableVectorContainer,
+          &testBox.traversableListContainer,
+          &testBox.traversableSetVecContainer,
+          &testBox.traversableSetLstContainer,
+          &testBox.traversableSortVecContainer,
+          &testBox.traversablePQHeapContainer,
+          &testBox.traversableHeapVecContainer,
+          &testBox.traversableVectorContainer,
+          &testBox.traversableListContainer,
+          &testBox.traversableSetVecContainer,
+          &testBox.traversableSetLstContainer,
+          &testBox.traversableSortVecContainer,
+          &testBox.traversablePQHeapContainer,
+          &testBox.traversableHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localTraversables[i] = std::move(tmp[i]);
+        }
+      }
+      TraversablesTest<Data, int>(
+        *localTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 7. OrderedDictionariesTest
-      OrderedDictionariesTest(testBox.orderedDictionarySetVecContainer, randomOutRange(testBox.orderedDictionarySetVecContainer.Min(), testBox.orderedDictionarySetVecContainer.Max()));
-      OrderedDictionariesTest(testBox.orderedDictionarySetLstContainer, randomOutRange(testBox.orderedDictionarySetLstContainer.Min(), testBox.orderedDictionarySetLstContainer.Max()));
-
+      try { OrderedDictionariesTest(testBox.orderedDictionarySetVecContainer, randomOutRange(testBox.orderedDictionarySetVecContainer.Min(), testBox.orderedDictionarySetVecContainer.Max())); }
+      catch(std::exception &e) { std::cout << "OrderedDictionariesTest exception: " << e.what() << std::endl; }
+      try { OrderedDictionariesTest(testBox.orderedDictionarySetLstContainer, randomOutRange(testBox.orderedDictionarySetLstContainer.Min(), testBox.orderedDictionarySetLstContainer.Max())); }
+      catch(std::exception &e) { std::cout << "OrderedDictionariesTest exception: " << e.what() << std::endl; }
+      
       // 8. MappablesTest
-      MappablesTest(testBox.mappableVectorContainer, mapF<Data>);
+      lasd::MappableContainer<Data>* localMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::MappableContainer<Data>*> tmp = {
+          &testBox.mappableVectorContainer,
+          &testBox.mappableListContainer,
+          &testBox.mappableSortVecContainer,
+          &testBox.mappableVectorContainer,
+          &testBox.mappableListContainer,
+          &testBox.mappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localMappables[i] = std::move(tmp[i]);
+        }
+      }
+      MappablesTest(*localMappables[0], mapF<Data>);
 
       // 9. PreOrderTraversablesTest
+      lasd::PreOrderTraversableContainer<Data>* localPreOrderTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::PreOrderTraversableContainer<Data>*> tmp = {
+          &testBox.preOrderTraversableVectorContainer,
+          &testBox.preOrderTraversableListContainer,
+          &testBox.preOrderTraversableSetVecContainer,
+          &testBox.preOrderTraversableSetLstContainer,
+          &testBox.preOrderTraversableSortVecContainer,
+          &testBox.preOrderTraversablePQHeapContainer,
+          &testBox.preOrderTraversableHeapVecContainer,
+          &testBox.preOrderTraversableVectorContainer,
+          &testBox.preOrderTraversableListContainer,
+          &testBox.preOrderTraversableSetVecContainer,
+          &testBox.preOrderTraversableSetLstContainer,
+          &testBox.preOrderTraversableSortVecContainer,
+          &testBox.preOrderTraversablePQHeapContainer,
+          &testBox.preOrderTraversableHeapVecContainer
+        };
+
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localPreOrderTraversables[i] = std::move(tmp[i]);
+        }
+      }
       PreOrderTraversablesTest(
-        testBox.preOrderTraversableVectorContainer,
+        *localPreOrderTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 10. PostOrderTraversablesTest
+      lasd::PostOrderTraversableContainer<Data>* localPostOrderTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::PostOrderTraversableContainer<Data>*> tmp = {
+          &testBox.postOrderTraversableVectorContainer,
+          &testBox.postOrderTraversableListContainer,
+          &testBox.postOrderTraversableSetVecContainer,
+          &testBox.postOrderTraversableSetLstContainer,
+          &testBox.postOrderTraversableSortVecContainer,
+          &testBox.postOrderTraversablePQHeapContainer,
+          &testBox.postOrderTraversableHeapVecContainer,
+          &testBox.postOrderTraversableVectorContainer,
+          &testBox.postOrderTraversableListContainer,
+          &testBox.postOrderTraversableSetVecContainer,
+          &testBox.postOrderTraversableSetLstContainer,
+          &testBox.postOrderTraversableSortVecContainer,
+          &testBox.postOrderTraversablePQHeapContainer,
+          &testBox.postOrderTraversableHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localPostOrderTraversables[i] = std::move(tmp[i]);
+        }
+      }
       PostOrderTraversablesTest(
-        testBox.postOrderTraversableVectorContainer,
+        *localPostOrderTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 11. PreOrderMappablesTest
-      PreOrderMappablesTest(testBox.preOrderMappableVectorContainer, 
+      lasd::PreOrderMappableContainer<Data>* localPreOrderMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::PreOrderMappableContainer<Data>*> tmp = {
+          &testBox.preOrderMappableVectorContainer,
+          &testBox.preOrderMappableListContainer,
+          &testBox.preOrderMappableSortVecContainer,
+          &testBox.preOrderMappableVectorContainer,
+          &testBox.preOrderMappableListContainer,
+          &testBox.preOrderMappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localPreOrderMappables[i] = std::move(tmp[i]);
+        }
+      }
+      PreOrderMappablesTest(
+        *localPreOrderMappables[0], 
         // [](Data& dat){ dat = Data("pre_" + dat.buffer); }
-        std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+        // std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+        mapF<Data>
       );
 
       // 12. PostOrderMappablesTest
-      PostOrderMappablesTest(testBox.postOrderMappableVectorContainer, 
+      lasd::PostOrderMappableContainer<Data>* localPostOrderMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::PostOrderMappableContainer<Data>*> tmp = {
+          &testBox.postOrderMappableVectorContainer,
+          &testBox.postOrderMappableListContainer,
+          &testBox.postOrderMappableSortVecContainer,
+          &testBox.postOrderMappableVectorContainer,
+          &testBox.postOrderMappableListContainer,
+          &testBox.postOrderMappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localPostOrderMappables[i] = std::move(tmp[i]);
+        }
+      }
+      PostOrderMappablesTest(
+        *localPostOrderMappables[0], 
         // [](Data& dat){ dat = Data("post_" + dat.buffer); }
-        std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+        // std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+        mapF<Data>
       );
 
       // 13. LinearsTest
-      LinearsTest(testBox.linearVectorContainer, testBox.linearListContainer, 0);
+      lasd::LinearContainer<Data>* localLinears[NUM_OF_LINEAR];
+      {
+        std::vector<lasd::LinearContainer<Data>*> tmp = {
+          &testBox.linearVectorContainer,
+          &testBox.linearListContainer,
+          &testBox.linearSetVecContainer,
+          &testBox.linearSetLstContainer,
+          &testBox.linearSortVecContainer,
+          &testBox.linearPQHeapContainer,
+          &testBox.linearHeapVecContainer,
+          &testBox.linearVectorContainer,
+          &testBox.linearListContainer,
+          &testBox.linearSetVecContainer,
+          &testBox.linearSetLstContainer,
+          &testBox.linearSortVecContainer,
+          &testBox.linearPQHeapContainer,
+          &testBox.linearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+          localLinears[i] = std::move(tmp[i]);
+        }
+      }
+      LinearsTest(*localLinears[0], *localLinears[NUM_OF_LINEAR-1], randomOutRange(0, std::max(0, static_cast<int>(std::min((*localLinears[0]).Size()-1, (*localLinears[NUM_OF_LINEAR-1]).Size()-1)))));
 
       // 14. MutableLinearsTest
-      MutableLinearsTest(testBox.mutableLinearVectorContainer, Alphabet[0], Alphabet[1], 0, Alphabet[2]);
+      lasd::MutableLinearContainer<Data>* localMutableLinears[NUM_OF_MUTABLE_LINEAR];
+      {
+        std::vector<lasd::MutableLinearContainer<Data>*> tmp = {
+          &testBox.mutableLinearVectorContainer,
+          &testBox.mutableLinearListContainer,
+          &testBox.mutableLinearSortVecContainer,
+          &testBox.mutableLinearHeapVecContainer,
+          &testBox.mutableLinearVectorContainer,
+          &testBox.mutableLinearListContainer,
+          &testBox.mutableLinearSortVecContainer,
+          &testBox.mutableLinearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+          localMutableLinears[i] = std::move(tmp[i]);
+        }
+      }
+      MutableLinearsTest(*localMutableLinears[0], Alphabet[0], Alphabet[Alphabet.Size()-1], randomOutRange(0, std::max(0, static_cast<int>(std::min((*localLinears[0]).Size()-1, (*localLinears[NUM_OF_LINEAR-1]).Size()-1)))), Alphabet[randomInRange(0, Alphabet.Size()-1)]);
 
       // 15. SortableLinearsTest
-      SortableLinearsTest(testBox.sortableLinearSortVecContainer, 0);
+      lasd::SortableLinearContainer<Data>* localSortableLinears[NUM_OF_SORTABLE_LINEAR];
+      {
+        std::vector<lasd::SortableLinearContainer<Data>*> tmp = {
+          &testBox.sortableLinearSortVecContainer,
+          &testBox.sortableLinearHeapVecContainer,
+          &testBox.sortableLinearSortVecContainer,
+          &testBox.sortableLinearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_SORTABLE_LINEAR; ++i) {
+          localSortableLinears[i] = std::move(tmp[i]);
+        }
+      }
+      SortableLinearsTest(*localSortableLinears[0]);
 
       // 16. ListsTest
       ListsTest(testBox.list1);
@@ -2299,7 +2680,8 @@ namespace myT
       HeapsTest(testBox.heap1);
 
       // 18. PQsTest
-      PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1));
+      try { PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1)); }
+      catch(std::exception &e) { std::cout << "PQsTest exception: " << e.what() << std::endl; }
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
       {
@@ -2312,6 +2694,7 @@ namespace myT
         }
       }
     }
+
       
     {
       std::cout << "Testing All Interfaces on MultiBoxes:" << std::endl;
@@ -2358,62 +2741,242 @@ namespace myT
       DictionariesTest(testBox.dictionarySetLstContainer, randomOutRange(Alphabet.Min(), Alphabet.Max()), testBox.traversableVectorContainer);
 
       // 6. TraversablesTest
-      TraversablesTest(
-        testBox.traversableVectorContainer,
+      lasd::TraversableContainer<Data>* localTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::TraversableContainer<Data>*> tmp = {
+          &testBox.traversableVectorContainer,
+          &testBox.traversableListContainer,
+          &testBox.traversableSetVecContainer,
+          &testBox.traversableSetLstContainer,
+          &testBox.traversableSortVecContainer,
+          &testBox.traversablePQHeapContainer,
+          &testBox.traversableHeapVecContainer,
+          &testBox.traversableVectorContainer,
+          &testBox.traversableListContainer,
+          &testBox.traversableSetVecContainer,
+          &testBox.traversableSetLstContainer,
+          &testBox.traversableSortVecContainer,
+          &testBox.traversablePQHeapContainer,
+          &testBox.traversableHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localTraversables[i] = std::move(tmp[i]);
+        }
+      }
+      TraversablesTest<Data, int>(
+        *localTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 7. OrderedDictionariesTest
-      OrderedDictionariesTest(testBox.orderedDictionarySetVecContainer, randomOutRange(testBox.orderedDictionarySetVecContainer.Min(), testBox.orderedDictionarySetVecContainer.Max()));
-      OrderedDictionariesTest(testBox.orderedDictionarySetLstContainer, randomOutRange(testBox.orderedDictionarySetLstContainer.Min(), testBox.orderedDictionarySetLstContainer.Max()));
-
+      try { OrderedDictionariesTest(testBox.orderedDictionarySetVecContainer, randomOutRange(testBox.orderedDictionarySetVecContainer.Min(), testBox.orderedDictionarySetVecContainer.Max())); }
+      catch(std::exception &e) { std::cout << "OrderedDictionariesTest exception: " << e.what() << std::endl; }
+      try { OrderedDictionariesTest(testBox.orderedDictionarySetLstContainer, randomOutRange(testBox.orderedDictionarySetLstContainer.Min(), testBox.orderedDictionarySetLstContainer.Max())); }
+      catch(std::exception &e) { std::cout << "OrderedDictionariesTest exception: " << e.what() << std::endl; }
+      
       // 8. MappablesTest
-      MappablesTest(testBox.mappableVectorContainer, mapF<Data>);
+      lasd::MappableContainer<Data>* localMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::MappableContainer<Data>*> tmp = {
+          &testBox.mappableVectorContainer,
+          &testBox.mappableListContainer,
+          &testBox.mappableSortVecContainer,
+          &testBox.mappableVectorContainer,
+          &testBox.mappableListContainer,
+          &testBox.mappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localMappables[i] = std::move(tmp[i]);
+        }
+      }
+      MappablesTest(*localMappables[0], mapF<Data>);
 
       // 9. PreOrderTraversablesTest
+      lasd::PreOrderTraversableContainer<Data>* localPreOrderTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::PreOrderTraversableContainer<Data>*> tmp = {
+          &testBox.preOrderTraversableVectorContainer,
+          &testBox.preOrderTraversableListContainer,
+          &testBox.preOrderTraversableSetVecContainer,
+          &testBox.preOrderTraversableSetLstContainer,
+          &testBox.preOrderTraversableSortVecContainer,
+          &testBox.preOrderTraversablePQHeapContainer,
+          &testBox.preOrderTraversableHeapVecContainer,
+          &testBox.preOrderTraversableVectorContainer,
+          &testBox.preOrderTraversableListContainer,
+          &testBox.preOrderTraversableSetVecContainer,
+          &testBox.preOrderTraversableSetLstContainer,
+          &testBox.preOrderTraversableSortVecContainer,
+          &testBox.preOrderTraversablePQHeapContainer,
+          &testBox.preOrderTraversableHeapVecContainer
+        };
+
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localPreOrderTraversables[i] = std::move(tmp[i]);
+        }
+      }
       PreOrderTraversablesTest(
-        testBox.preOrderTraversableVectorContainer,
+        *localPreOrderTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 10. PostOrderTraversablesTest
+      lasd::PostOrderTraversableContainer<Data>* localPostOrderTraversables[NUM_OF_TRAVERSABLE];
+      {
+        std::vector<lasd::PostOrderTraversableContainer<Data>*> tmp = {
+          &testBox.postOrderTraversableVectorContainer,
+          &testBox.postOrderTraversableListContainer,
+          &testBox.postOrderTraversableSetVecContainer,
+          &testBox.postOrderTraversableSetLstContainer,
+          &testBox.postOrderTraversableSortVecContainer,
+          &testBox.postOrderTraversablePQHeapContainer,
+          &testBox.postOrderTraversableHeapVecContainer,
+          &testBox.postOrderTraversableVectorContainer,
+          &testBox.postOrderTraversableListContainer,
+          &testBox.postOrderTraversableSetVecContainer,
+          &testBox.postOrderTraversableSetLstContainer,
+          &testBox.postOrderTraversableSortVecContainer,
+          &testBox.postOrderTraversablePQHeapContainer,
+          &testBox.postOrderTraversableHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
+          localPostOrderTraversables[i] = std::move(tmp[i]);
+        }
+      }
       PostOrderTraversablesTest(
-        testBox.postOrderTraversableVectorContainer,
+        *localPostOrderTraversables[0],
         // [](const Data& dat){ std::cout << dat << " "; },
         // [](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); },
-        std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
-        std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
-        Alphabet[0]
+        // std::function<void(const Data&)>([](const Data& dat){ std::cout << dat << " "; }),
+        // std::function<Data(const Data&, const Data&)>([](const Data& dat, const Data& acc){ return DataT(acc.buffer + dat.buffer); }),
+        travF<Data>,
+        foldF<Data, int>,
+        0
       );
 
       // 11. PreOrderMappablesTest
-      PreOrderMappablesTest(testBox.preOrderMappableVectorContainer, 
+      lasd::PreOrderMappableContainer<Data>* localPreOrderMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::PreOrderMappableContainer<Data>*> tmp = {
+          &testBox.preOrderMappableVectorContainer,
+          &testBox.preOrderMappableListContainer,
+          &testBox.preOrderMappableSortVecContainer,
+          &testBox.preOrderMappableVectorContainer,
+          &testBox.preOrderMappableListContainer,
+          &testBox.preOrderMappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localPreOrderMappables[i] = std::move(tmp[i]);
+        }
+      }
+      PreOrderMappablesTest(
+        *localPreOrderMappables[0], 
         // [](Data& dat){ dat = Data("pre_" + dat.buffer); }
-        std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+        // std::function<void(Data&)>([](Data& dat){ dat = Data("pre_" + dat.buffer); })
+        mapF<Data>
       );
 
       // 12. PostOrderMappablesTest
-      PostOrderMappablesTest(testBox.postOrderMappableVectorContainer, 
+      lasd::PostOrderMappableContainer<Data>* localPostOrderMappables[NUM_OF_MAPPABLE];
+      {
+        std::vector<lasd::PostOrderMappableContainer<Data>*> tmp = {
+          &testBox.postOrderMappableVectorContainer,
+          &testBox.postOrderMappableListContainer,
+          &testBox.postOrderMappableSortVecContainer,
+          &testBox.postOrderMappableVectorContainer,
+          &testBox.postOrderMappableListContainer,
+          &testBox.postOrderMappableSortVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
+          localPostOrderMappables[i] = std::move(tmp[i]);
+        }
+      }
+      PostOrderMappablesTest(
+        *localPostOrderMappables[0], 
         // [](Data& dat){ dat = Data("post_" + dat.buffer); }
-        std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+        // std::function<void(Data&)>([](Data& dat){ dat = Data("post_" + dat.buffer); })
+        mapF<Data>
       );
 
       // 13. LinearsTest
-      LinearsTest(testBox.linearVectorContainer, testBox.linearListContainer, 0);
+      lasd::LinearContainer<Data>* localLinears[NUM_OF_LINEAR];
+      {
+        std::vector<lasd::LinearContainer<Data>*> tmp = {
+          &testBox.linearVectorContainer,
+          &testBox.linearListContainer,
+          &testBox.linearSetVecContainer,
+          &testBox.linearSetLstContainer,
+          &testBox.linearSortVecContainer,
+          &testBox.linearPQHeapContainer,
+          &testBox.linearHeapVecContainer,
+          &testBox.linearVectorContainer,
+          &testBox.linearListContainer,
+          &testBox.linearSetVecContainer,
+          &testBox.linearSetLstContainer,
+          &testBox.linearSortVecContainer,
+          &testBox.linearPQHeapContainer,
+          &testBox.linearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+          localLinears[i] = std::move(tmp[i]);
+        }
+      }
+      LinearsTest(*localLinears[0], *localLinears[NUM_OF_LINEAR-1], randomOutRange(0, std::max(0, static_cast<int>(std::min((*localLinears[0]).Size()-1, (*localLinears[NUM_OF_LINEAR-1]).Size()-1)))));
 
       // 14. MutableLinearsTest
-      MutableLinearsTest(testBox.mutableLinearVectorContainer, Alphabet[0], Alphabet[1], 0, Alphabet[2]);
+      lasd::MutableLinearContainer<Data>* localMutableLinears[NUM_OF_MUTABLE_LINEAR];
+      {
+        std::vector<lasd::MutableLinearContainer<Data>*> tmp = {
+          &testBox.mutableLinearVectorContainer,
+          &testBox.mutableLinearListContainer,
+          &testBox.mutableLinearSortVecContainer,
+          &testBox.mutableLinearHeapVecContainer,
+          &testBox.mutableLinearVectorContainer,
+          &testBox.mutableLinearListContainer,
+          &testBox.mutableLinearSortVecContainer,
+          &testBox.mutableLinearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+          localMutableLinears[i] = std::move(tmp[i]);
+        }
+      }
+      MutableLinearsTest(*localMutableLinears[0], Alphabet[0], Alphabet[Alphabet.Size()-1], randomOutRange(0, std::max(0, static_cast<int>(std::min((*localLinears[0]).Size()-1, (*localLinears[NUM_OF_LINEAR-1]).Size()-1)))), Alphabet[randomInRange(0, Alphabet.Size()-1)]);
 
       // 15. SortableLinearsTest
-      SortableLinearsTest(testBox.sortableLinearSortVecContainer, 0);
+      lasd::SortableLinearContainer<Data>* localSortableLinears[NUM_OF_SORTABLE_LINEAR];
+      {
+        std::vector<lasd::SortableLinearContainer<Data>*> tmp = {
+          &testBox.sortableLinearSortVecContainer,
+          &testBox.sortableLinearHeapVecContainer,
+          &testBox.sortableLinearSortVecContainer,
+          &testBox.sortableLinearHeapVecContainer
+        };
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        for (ulong i = 0; i < NUM_OF_SORTABLE_LINEAR; ++i) {
+          localSortableLinears[i] = std::move(tmp[i]);
+        }
+      }
+      SortableLinearsTest(*localSortableLinears[0]);
 
       // 16. ListsTest
       ListsTest(testBox.list1);
@@ -2422,7 +2985,8 @@ namespace myT
       HeapsTest(testBox.heap1);
 
       // 18. PQsTest
-      PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1));
+      try { PQsTest(testBox.pq1, randomOutRange(Alphabet.Min(), testBox.pq1.Tip()), randomOutRange(0, testBox.pq1.Size()-1)); }
+      catch(std::exception &e) { std::cout << "PQsTest exception: " << e.what() << std::endl; }
 
       std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
       {
@@ -2435,6 +2999,7 @@ namespace myT
         }
       }
     }
+
  
   }
 
@@ -2469,6 +3034,14 @@ void mytest()
   mapF<DataT> = [](DataT &dat)
   {
     dat = DataT("mapped_" + dat.buffer);
+  };
+  travF<DataT> = [](const DataT &dat)
+  {
+    std::cout << dat << ", ";
+  };
+  foldF<DataT, int> = [&](const DataT &dat, const int &acc)
+  {
+    return acc + (boxTester.setVec2.Exists(dat) ? 1 : 0);
   };
 
   Gentest1<DataT>(boxTester.setVec2);
