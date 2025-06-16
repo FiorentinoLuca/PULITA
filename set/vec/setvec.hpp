@@ -96,9 +96,16 @@ public:
   // Specific member functions (inherited from DictionaryContainer)
 
   bool Insert(const Data&) override; // Override DictionaryContainer member (copy of the value)
-  bool Insert(Data&&) noexcept override;  // Override DictionaryContainer member (move of the value)
+  bool AttachWithIn(const Data&, ulong);
+  bool AttachWithIn(Data&&, ulong);
+  bool Insert(Data &&) override;     // Override DictionaryContainer member (move of the value)
   bool Remove(const Data&) override; // Override DictionaryContainer member
 
+  bool InsertAll(const TraversableContainer<Data> &box) override; // Override DictionaryContainer member
+  bool InsertAll(MappableContainer<Data> &&box) override; // Override DictionaryContainer member
+  bool InsertSome(const TraversableContainer<Data> &box) override; // Override DictionaryContainer member
+  bool InsertSome(MappableContainer<Data> &&box) override; // Override DictionaryContainer member
+  
   /* ************************************************************************ */
 
   // Specific member functions (inherited from LinearContainer)

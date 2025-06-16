@@ -1,3 +1,4 @@
+#include "setvec.hpp"
 
 namespace lasd {
 
@@ -209,7 +210,7 @@ inline void SetVec<Data>::RemoveSuccessor(const Data& dat) {
 
 template <typename Data>
 bool SetVec<Data>::Insert(const Data& dat) {
-
+  /*
   int foundIndex = BSearch(dat);
 
   if (foundIndex != -1 && (*this)[foundIndex] == dat)
@@ -223,12 +224,50 @@ bool SetVec<Data>::Insert(const Data& dat) {
   (*this)[foundIndex] = dat;
 
   return true;
+  */
+ 
+  return AttachWithIn(dat, numElements + 1);
 }
 
 template <typename Data>
-bool SetVec<Data>::Insert(Data&& dat)
-  noexcept {
+bool SetVec<Data>::AttachWithIn(const Data& dat, ulong dim)
+{
+  int foundIndex = BSearch(dat);
 
+  if (foundIndex != -1 && (*this)[foundIndex] == dat)
+                                        return false;
+
+  EnsureCapacity(dim);
+
+  Shift(foundIndex, 1);
+  foundIndex = foundIndex+1;
+
+  (*this)[foundIndex] = dat;
+
+  return true;
+}
+
+template <typename Data>
+bool SetVec<Data>::AttachWithIn(Data&& dat, ulong dim)
+{
+  int foundIndex = BSearch(dat);
+
+  if (foundIndex != -1 && (*this)[foundIndex] == dat)
+                                        return false;
+
+  EnsureCapacity(dim);
+
+  Shift(foundIndex, 1);
+  foundIndex = foundIndex+1;
+
+  (*this)[foundIndex] = std::move(dat);
+
+  return true;
+}
+
+template <typename Data>
+bool SetVec<Data>::Insert(Data&& dat) {
+  /*
     int foundIndex = BSearch(dat);
 
     if (foundIndex != -1 && (*this)[foundIndex] == dat) 
@@ -242,6 +281,56 @@ bool SetVec<Data>::Insert(Data&& dat)
     (*this)[foundIndex] = std::move(dat);
 
   return true;
+  */
+  return AttachWithIn(std::move(dat), numElements + 1);
+}
+
+template <typename Data>
+bool SetVec<Data>::InsertAll(const TraversableContainer<Data>& box) {
+  bool check = true;
+  box.Traverse(
+    [this, &box, &check](const Data&dat)
+    {
+      check = (AttachWithIn(dat, box.Size()) && check);
+    }
+  );
+  return check;
+}
+
+template <typename Data>
+bool SetVec<Data>::InsertAll(MappableContainer<Data>&& box) {
+  bool check = true;
+  box.Map(
+    [this, &box, &check](Data& dat)
+    {
+      check = (AttachWithIn(std::move(dat), box.Size()) && check);
+    }
+  );
+  return check;
+}
+
+template <typename Data>
+bool SetVec<Data>::InsertSome(const TraversableContainer<Data>& box) {
+  bool check = false;
+  box.Traverse(
+    [this, &box, &check](const Data& dat)
+    {
+      check = (AttachWithIn(dat, box.Size()) || check);
+    }
+  );
+  return check;
+}
+
+template <typename Data>
+bool SetVec<Data>::InsertSome(MappableContainer<Data>&& box) {
+  bool check = false;
+  box.Map(
+    [this, &box, &check](Data& dat)
+    {
+      check = (AttachWithIn(std::move(dat), box.Size()) || check);
+    }
+  );
+  return check;
 }
 
 template <typename Data>

@@ -395,10 +395,19 @@ void List<Data>::postorderrecursion(Node* node, TraverseFun fun)
 template <typename Data>
 inline void List<Data>::Clear() 
   noexcept {
+    /* 
+    #TODO:
     if (Empty()) return;
-    
-    head->Flush();
-    delete head;
+    ->
+    if (!Empty()) {
+      head->Flush();
+      delete head;
+    }
+    */
+    if (!Empty()) {
+      head->Flush();
+      delete head;
+    }
     head = nullptr;
     tail = nullptr;
     size = 0;

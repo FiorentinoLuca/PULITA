@@ -477,13 +477,13 @@ namespace myT
   class BoxRandomTester;
 
   template <typename Data>
-  lasd::Vector<Data> getRandomTraversableContainer(const lasd::Vector<Data> &Alphabet, ulong min, ulong max)
+  lasd::Vector<Data> getRandomTraversableContainer(const lasd::Set<Data> &Alphabet, ulong min, ulong max)
   {
     ulong size = min + (rand() % (std::max(0, static_cast<int>(max - min + 1))));
     lasd::Vector<Data> travCont(size);
 
     travCont.Map(
-      [Alphabet](Data &dat)
+      [&Alphabet](Data &dat)
       {
         dat = Alphabet[rand() % Alphabet.Size()];
       }
@@ -493,7 +493,7 @@ namespace myT
   }
 
   template <typename Data>
-  lasd::Vector<Data> getRandomUniqueTraversableContainer(const lasd::Vector<Data> &Alphabet, ulong min, ulong max)
+  lasd::Vector<Data> getRandomUniqueTraversableContainer(const lasd::Set<Data> &Alphabet, ulong min, ulong max)
   {
     lasd::SetVec<Data> uniquesAlphabet(Alphabet);
     max = std::min(max, uniquesAlphabet.Size());
@@ -501,7 +501,7 @@ namespace myT
   
     std::vector<ulong> indices(uniquesAlphabet.Size());
     std::iota(indices.begin(), indices.end(), 0);
-    std::shuffle(indices.begin(), indices.end(), std::mt19937(std::random_device{}()));
+    std::shuffle(indices.begin(), indices.end(), std::mt19937(BoxRandomTester<Data>::seed));
 
     lasd::Vector<Data> travCont(size);
     for (ulong i = 0; i < size; ++i) {
@@ -518,7 +518,7 @@ namespace myT
   }
 
   template <typename Data>
-  BoxRandomTester<Data> MonoBoxes(const lasd::Vector<Data> &Alphabet) {
+  BoxRandomTester<Data> MonoBoxes(const lasd::Set<Data> &Alphabet) {
     BoxRandomTester<Data> testBox(
       
       // --- Container ---
@@ -653,7 +653,7 @@ namespace myT
   }
     
   template <typename Data>
-  BoxRandomTester<Data> MultiBoxes(const lasd::Vector<Data> &Alphabet, ulong maxsize) {
+  BoxRandomTester<Data> MultiBoxes(const lasd::Set<Data> &Alphabet, ulong maxsize) {
     BoxRandomTester<Data> testBox(
       
       // --- Container ---
@@ -1973,12 +1973,11 @@ namespace myT
   const time_t BoxRandomTester<Data>::seed = time(nullptr);
   
   // template <typename Data>
-  // const time_t BoxRandomTester<Data>::seed = 1749766619;
+  // const time_t BoxRandomTester<Data>::seed = 1750093403;
 
   std::string randomInRange(const std::string& min, const std::string& max) {
-    
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
+
+    static std::mt19937 gen(BoxRandomTester<DataT>::seed);
     // Trova il primo carattere che differisce
     size_t i = 0;
     while (i < min.size() && i < max.size() && min[i] == max[i]) ++i;
@@ -2022,16 +2021,14 @@ namespace myT
 
   int randomInRange(int min, int max) {
     if (min > max) throw std::invalid_argument("min must be less or equal than max");
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
+    static std::mt19937 gen(BoxRandomTester<DataT>::seed);
     std::uniform_int_distribution<int> dist(min, max);
     return dist(gen);
   }
 
   float randomInRange(float min, float max) {
     if (min > max) throw std::invalid_argument("min must be less or equal than max");
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
+    static std::mt19937 gen(BoxRandomTester<DataT>::seed);
     std::uniform_real_distribution<float> dist(min, max);
     return dist(gen);
   }
@@ -2150,7 +2147,7 @@ namespace myT
           &testBox.traversablePQHeapContainer,
           &testBox.traversableHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localTraversables[i] = std::move(tmp[i]);
         }
@@ -2183,7 +2180,7 @@ namespace myT
           &testBox.mappableListContainer,
           &testBox.mappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localMappables[i] = std::move(tmp[i]);
         }
@@ -2210,7 +2207,7 @@ namespace myT
           &testBox.preOrderTraversableHeapVecContainer
         };
 
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localPreOrderTraversables[i] = std::move(tmp[i]);
         }
@@ -2245,7 +2242,7 @@ namespace myT
           &testBox.postOrderTraversablePQHeapContainer,
           &testBox.postOrderTraversableHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localPostOrderTraversables[i] = std::move(tmp[i]);
         }
@@ -2272,7 +2269,7 @@ namespace myT
           &testBox.preOrderMappableListContainer,
           &testBox.preOrderMappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localPreOrderMappables[i] = std::move(tmp[i]);
         }
@@ -2295,7 +2292,7 @@ namespace myT
           &testBox.postOrderMappableListContainer,
           &testBox.postOrderMappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localPostOrderMappables[i] = std::move(tmp[i]);
         }
@@ -2326,7 +2323,7 @@ namespace myT
           &testBox.linearPQHeapContainer,
           &testBox.linearHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
           localLinears[i] = std::move(tmp[i]);
         }
@@ -2346,8 +2343,8 @@ namespace myT
           &testBox.mutableLinearSortVecContainer,
           &testBox.mutableLinearHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
-        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
+        for (ulong i = 0; i < NUM_OF_MUTABLE_LINEAR; ++i) {
           localMutableLinears[i] = std::move(tmp[i]);
         }
       }
@@ -2405,7 +2402,7 @@ namespace myT
           std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
       }
-      std::cout << "Random seed: " << BoxRandomTester<DataT>::seed << std::endl;
+      std::cout << "Random seed: " << BoxRandomTester<Data>::seed << std::endl;
 
       // 1. ContainersTest
       ContainersTest(testBox.vectorContainer);
@@ -2454,7 +2451,7 @@ namespace myT
           &testBox.traversablePQHeapContainer,
           &testBox.traversableHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localTraversables[i] = std::move(tmp[i]);
         }
@@ -2487,7 +2484,7 @@ namespace myT
           &testBox.mappableListContainer,
           &testBox.mappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localMappables[i] = std::move(tmp[i]);
         }
@@ -2514,7 +2511,7 @@ namespace myT
           &testBox.preOrderTraversableHeapVecContainer
         };
 
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localPreOrderTraversables[i] = std::move(tmp[i]);
         }
@@ -2549,7 +2546,7 @@ namespace myT
           &testBox.postOrderTraversablePQHeapContainer,
           &testBox.postOrderTraversableHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localPostOrderTraversables[i] = std::move(tmp[i]);
         }
@@ -2576,7 +2573,7 @@ namespace myT
           &testBox.preOrderMappableListContainer,
           &testBox.preOrderMappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localPreOrderMappables[i] = std::move(tmp[i]);
         }
@@ -2599,7 +2596,7 @@ namespace myT
           &testBox.postOrderMappableListContainer,
           &testBox.postOrderMappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localPostOrderMappables[i] = std::move(tmp[i]);
         }
@@ -2630,7 +2627,7 @@ namespace myT
           &testBox.linearPQHeapContainer,
           &testBox.linearHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
           localLinears[i] = std::move(tmp[i]);
         }
@@ -2650,8 +2647,8 @@ namespace myT
           &testBox.mutableLinearSortVecContainer,
           &testBox.mutableLinearHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
-        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
+        for (ulong i = 0; i < NUM_OF_MUTABLE_LINEAR; ++i) {
           localMutableLinears[i] = std::move(tmp[i]);
         }
       }
@@ -2666,7 +2663,7 @@ namespace myT
           &testBox.sortableLinearSortVecContainer,
           &testBox.sortableLinearHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_SORTABLE_LINEAR; ++i) {
           localSortableLinears[i] = std::move(tmp[i]);
         }
@@ -2759,7 +2756,7 @@ namespace myT
           &testBox.traversablePQHeapContainer,
           &testBox.traversableHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localTraversables[i] = std::move(tmp[i]);
         }
@@ -2792,7 +2789,7 @@ namespace myT
           &testBox.mappableListContainer,
           &testBox.mappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localMappables[i] = std::move(tmp[i]);
         }
@@ -2819,7 +2816,7 @@ namespace myT
           &testBox.preOrderTraversableHeapVecContainer
         };
 
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localPreOrderTraversables[i] = std::move(tmp[i]);
         }
@@ -2854,7 +2851,7 @@ namespace myT
           &testBox.postOrderTraversablePQHeapContainer,
           &testBox.postOrderTraversableHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_TRAVERSABLE; ++i) {
           localPostOrderTraversables[i] = std::move(tmp[i]);
         }
@@ -2881,7 +2878,7 @@ namespace myT
           &testBox.preOrderMappableListContainer,
           &testBox.preOrderMappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localPreOrderMappables[i] = std::move(tmp[i]);
         }
@@ -2904,7 +2901,7 @@ namespace myT
           &testBox.postOrderMappableListContainer,
           &testBox.postOrderMappableSortVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_MAPPABLE; ++i) {
           localPostOrderMappables[i] = std::move(tmp[i]);
         }
@@ -2935,7 +2932,7 @@ namespace myT
           &testBox.linearPQHeapContainer,
           &testBox.linearHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
           localLinears[i] = std::move(tmp[i]);
         }
@@ -2955,8 +2952,8 @@ namespace myT
           &testBox.mutableLinearSortVecContainer,
           &testBox.mutableLinearHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
-        for (ulong i = 0; i < NUM_OF_LINEAR; ++i) {
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
+        for (ulong i = 0; i < NUM_OF_MUTABLE_LINEAR; ++i) {
           localMutableLinears[i] = std::move(tmp[i]);
         }
       }
@@ -2971,7 +2968,7 @@ namespace myT
           &testBox.sortableLinearSortVecContainer,
           &testBox.sortableLinearHeapVecContainer
         };
-        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(std::random_device{}()));
+        std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
         for (ulong i = 0; i < NUM_OF_SORTABLE_LINEAR; ++i) {
           localSortableLinears[i] = std::move(tmp[i]);
         }
@@ -3001,6 +2998,642 @@ namespace myT
     }
 
  
+  }
+
+  template <typename Box>
+  std::function<void(Box**)> Empty;
+  template <typename Box>
+  std::function<void(Box**)> Singletonize;
+  template <typename Box>
+  std::function<void(Box**)> Multiply;
+
+  template <typename Data>
+  void Gentest2(const lasd::Set<Data> &Alphabet){
+    enum class Algebra {
+      VEC, // Modification by explicit resizing
+      LST, // Modification by appending and stacking
+      SET, // Modification by insertion and removal
+      PQ // Modification by priority queue operations
+    };
+    BoxRandomTester<Data> testBox;
+
+    lasd::Vector<Data>* localVecs[NUM_OF_VECTOR];
+    {
+      std::vector<lasd::Vector<Data>*> tmp = {
+        &testBox.vector1,
+        &testBox.vector2,
+        &testBox.sortableVector1,
+        &testBox.sortableVector2,
+        &testBox.vector1,
+        &testBox.vector2,
+        &testBox.sortableVector1,
+        &testBox.sortableVector2
+      };
+      std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
+      for (ulong i = 0; i < NUM_OF_VECTOR; ++i) {
+        localVecs[i] = std::move(tmp[i]);
+      }
+    }
+    lasd::List<Data>* localLists[2*NUM_OF_LIST];
+    {
+      std::vector<lasd::List<Data>*> tmp = {
+        &testBox.list1,
+        &testBox.list2,
+        &testBox.list1,
+        &testBox.list2
+      };
+      std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
+      for (ulong i = 0; i < 2*NUM_OF_LIST; ++i) {
+        localLists[i] = std::move(tmp[i]);
+      }
+    }
+    lasd::Set<Data>* localSets[NUM_OF_SET];
+    {
+      std::vector<lasd::Set<Data>*> tmp = {
+        &testBox.setVec1,
+        &testBox.setVec2,
+        &testBox.setLst1,
+        &testBox.setLst2,
+        &testBox.setVec1,
+        &testBox.setVec2,
+        &testBox.setLst1,
+        &testBox.setLst2
+      };
+      std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
+      for (ulong i = 0; i < NUM_OF_SET; ++i) {
+        localSets[i] = std::move(tmp[i]);
+      }
+    }
+    lasd::PQHeap<Data>* localPQs[2*NUM_OF_PQ];
+    {
+      std::vector<lasd::PQHeap<Data>*> tmp = {
+        &testBox.pqHeap1,
+        &testBox.pqHeap2,
+        &testBox.pqHeap1,
+        &testBox.pqHeap2
+      };
+      std::shuffle(tmp.begin(), tmp.end(), std::mt19937(BoxRandomTester<Data>::seed));
+      for (ulong i = 0; i < 2*NUM_OF_PQ; ++i) {
+        localPQs[i] = std::move(tmp[i]);
+      }
+    }
+
+    Empty<lasd::Vector<Data>> = [&](lasd::Vector<Data>* localVecs[NUM_OF_VECTOR])
+    {
+      TraversablesTest<Data, int>(*localVecs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localVecs[1], travF<Data>, foldF<Data, int>, 0);
+      for (ulong i = 0; i < NUM_OF_VECTOR; ++i) {
+        do {
+          localVecs[i]->Resize(std::max(0, static_cast<int>(localVecs[i]->Size()-1)));
+        } while (localVecs[i]->Size() > 1);
+      }
+      for (ulong i = 0; i < NUM_OF_VECTOR; ++i) {
+        do {
+          localVecs[i]->Resize(std::max(0, static_cast<int>(localVecs[i]->Size()-1)));
+        } while (localVecs[i]->Size() > 1);
+      }
+      TraversablesTest<Data, int>(*localVecs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localVecs[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::Vector<Data> localCopies[NUM_OF_VECTOR] = { *localVecs[0], *localVecs[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      localCopies[0].Clear();
+      for (ulong i = 1; i < NUM_OF_VECTOR; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      for (ulong i = 0; i < NUM_OF_VECTOR; ++i) {
+        localCopies[i].Clear();
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Singletonize<lasd::Vector<Data>> = [&](lasd::Vector<Data>* localVecs[NUM_OF_VECTOR])
+    {
+      TraversablesTest<Data, int>(*localVecs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localVecs[1], travF<Data>, foldF<Data, int>, 0);
+      localVecs[0]->Resize(1);
+      localVecs[0]->operator[](0) = randomInRange(Alphabet.Min(), Alphabet.Max());
+      for (ulong i = 1; i < NUM_OF_VECTOR; ++i) {
+        *localVecs[i] = *localVecs[i-1];
+      }
+      TraversablesTest<Data, int>(*localVecs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localVecs[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::Vector<Data> localCopies[NUM_OF_VECTOR] = { *localVecs[0], *localVecs[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      localCopies[0].Resize(1);
+      localCopies[0][0] = randomInRange(Alphabet.Min(), Alphabet.Max());
+      for (ulong i = 1; i < NUM_OF_VECTOR; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Multiply<lasd::Vector<Data>> = [&](lasd::Vector<Data>* localVecs[NUM_OF_VECTOR])
+    {
+      TraversablesTest<Data, int>(*localVecs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localVecs[1], travF<Data>, foldF<Data, int>, 0);
+      localVecs[0]->operator=(getRandomTraversableContainer(Alphabet,2,20));
+      for (ulong i = 1; i < NUM_OF_VECTOR; ++i) {
+        *localVecs[i] = *localVecs[i-1];
+      }
+      TraversablesTest<Data, int>(*localVecs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localVecs[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::Vector<Data> localCopies[NUM_OF_VECTOR] = { *localVecs[0], *localVecs[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      localCopies[0] = getRandomTraversableContainer(Alphabet,2,20);
+      for (ulong i = 1; i < NUM_OF_VECTOR; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Empty<lasd::List<Data>> = [&](lasd::List<Data>* localLists[2*NUM_OF_LIST])
+    {
+      TraversablesTest<Data, int>(*localLists[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localLists[1], travF<Data>, foldF<Data, int>, 0);
+      for (ulong i = 0; i < 2*NUM_OF_LIST; ++i) {
+        do {
+          for (ulong j = 0; j < 2; j++)
+            switch (randomInRange(0, 1)) {
+              case 0: try{ localLists[i]->RemoveFromBack(); } catch (std::length_error &e) { std::cout << "Exception in RemoveFromBack: " << e.what() << std::endl; }
+                      break;
+              case 1: try{ localLists[i]->RemoveFromFront(); } catch (std::length_error &e) { std::cout << "Exception in RemoveFromFront: " << e.what() << std::endl; }
+                      break;
+            }
+        } while (localLists[i]->Size() > 0 && !(localLists[i]->Empty()));
+      }
+      TraversablesTest<Data, int>(*localLists[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localLists[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::List<Data> localCopies[2*NUM_OF_LIST] = { *localLists[0], *localLists[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      localCopies[0].Clear();
+      for (ulong i = 1; i < 2*NUM_OF_LIST; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      for (ulong i = 0; i < 2*NUM_OF_LIST; ++i) {
+        localCopies[i].Clear();
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Singletonize<lasd::List<Data>> = [&](lasd::List<Data>* localLists[2*NUM_OF_LIST])
+    {
+      TraversablesTest<Data, int>(*localLists[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localLists[1], travF<Data>, foldF<Data, int>, 0);
+      for (ulong i = 0; i < 2*NUM_OF_LIST; ++i) {
+        while( localLists[i]->Size() > 2) {
+          for (ulong j = 0; j < 2; j++)
+            switch (randomInRange(0, 1)) {
+              case 0: try{ localLists[i]->RemoveFromBack(); } catch (std::length_error &e) { std::cout << "Exception in RemoveFromBack: " << e.what() << std::endl; }
+                      break;
+              case 1: try{ localLists[i]->RemoveFromFront(); } catch (std::length_error &e) { std::cout << "Exception in RemoveFromFront: " << e.what() << std::endl; }
+                      break;
+            }
+        }
+      }
+      if (localLists[0]->Size() == 2)
+        localLists[0]->RemoveFromBack();
+      if (localLists[0]->Empty()) {
+        Data dat = randomOutRange(Alphabet.Min(), Alphabet.Max());
+        switch (randomInRange(0, 1)) {
+          case 0: try{ localLists[0]->InsertAtBack(dat); } catch (std::length_error &e) { std::cout << "Exception in RemoveFromBack: " << e.what() << std::endl; }
+                  break;
+          case 1: try{ localLists[0]->InsertAtFront(dat); } catch (std::length_error &e) { std::cout << "Exception in RemoveFromFront: " << e.what() << std::endl; }
+                  break;
+        }
+      }
+      for (ulong i = 1; i < 2*NUM_OF_LIST; ++i) {
+        *localLists[i] = *localLists[i-1];
+      }
+      TraversablesTest<Data, int>(*localLists[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localLists[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::List<Data> localCopies[2*NUM_OF_LIST] = { *localLists[0], *localLists[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      localCopies[0][0] = randomInRange(Alphabet.Min(), Alphabet.Max());
+      for (ulong i = 1; i < 2*NUM_OF_LIST; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Multiply<lasd::List<Data>> = [&](lasd::List<Data>* localLists[2*NUM_OF_LIST])
+    {
+      TraversablesTest<Data, int>(*localLists[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localLists[1], travF<Data>, foldF<Data, int>, 0);
+      const lasd::LinearContainer<Data>& localLinear = getRandomTraversableContainer(Alphabet,2,20);
+      do {
+        for (ulong j = 0; j < 2; j++)
+          switch (randomInRange(0, 1)) {
+            case 0: localLists[0]->InsertAtBack(localLinear[randomInRange(0, localLinear.Size() - 1)]); // size protected
+                  break;
+            case 1: localLists[0]->InsertAtFront(localLinear[randomInRange(0, localLinear.Size() - 1)]);
+                  break;
+          }
+      } while (localLists[0]->Size() < localLinear.Size());
+      for (ulong i = 1; i < 2*NUM_OF_LIST; ++i) {
+        *localLists[i] = *localLists[i-1];
+      }
+      TraversablesTest<Data, int>(*localLists[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localLists[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::List<Data> localCopies[2*NUM_OF_LIST] = { *localLists[0], *localLists[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      ulong maxSize = randomInRange(2, 20);
+      do {
+        for (ulong j = 0; j < 2; j++)
+          switch (randomInRange(0, 1)) {
+            case 0: localCopies[0].InsertAtBack(randomOutRange(Alphabet.Min(), Alphabet.Max()));
+                  break;
+            case 1: localCopies[0].InsertAtFront(randomOutRange(Alphabet.Min(), Alphabet.Max()));
+                  break;
+          }
+      } while (localCopies[0].Size() < maxSize);
+      for (ulong i = 1; i < 2*NUM_OF_LIST; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Empty<lasd::Set<Data>> = [&](lasd::Set<Data>* localSets[NUM_OF_SET])
+    {
+      lasd::SetVec<Data> vecCopies[NUM_OF_SET];
+      lasd::SetLst<Data> lstCopies[NUM_OF_SET];
+      TraversablesTest<Data, int>(*localSets[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localSets[1], travF<Data>, foldF<Data, int>, 0);
+      for (ulong i = 0; i < NUM_OF_SET; ++i) {
+        localSets[i]->Clear();
+      }
+      TraversablesTest<Data, int>(*localSets[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localSets[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::Set<Data>* localCopies[NUM_OF_SET] {};
+      for (ulong i = 0; i < NUM_OF_SET; ++i) {
+        if (typeid(*localSets[i]) == typeid(lasd::SetVec<Data>)) {
+          vecCopies[i] = lasd::SetVec<Data>(*dynamic_cast<lasd::SetVec<Data>*>(localSets[i]));
+          localCopies[i] = &vecCopies[i];
+        } else if (typeid(*localSets[i]) == typeid(lasd::SetLst<Data>)) {
+          lstCopies[i] = lasd::SetLst<Data>(*dynamic_cast<lasd::SetLst<Data>*>(localSets[i]));
+          localCopies[i] = &lstCopies[i];
+        }
+      }
+      TraversablesTest<Data, int>(*localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      localCopies[0]->Clear();
+      for (ulong i = 1; i < NUM_OF_SET; ++i) {
+        localCopies[i]->RemoveAll(*localCopies[i]);
+        localCopies[i]->InsertAll(std::move(*localCopies[i-1])); // Traversable && ~ const Traversable&
+      }
+      for (ulong i = 0; i < NUM_OF_SET; ++i) {
+        localCopies[i]->Clear();
+      }
+      TraversablesTest<Data, int>(*localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Singletonize<lasd::Set<Data>> = [&](lasd::Set<Data>* localSets[NUM_OF_SET])
+    {
+      lasd::SetVec<Data> vecCopies[NUM_OF_SET];
+      lasd::SetLst<Data> lstCopies[NUM_OF_SET];
+      TraversablesTest<Data, int>(*localSets[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localSets[1], travF<Data>, foldF<Data, int>, 0);
+      for (ulong i = 0; i < NUM_OF_SET; ++i) {
+        while( localSets[i]->Size() > 1) {
+          switch (randomInRange(0, 4)) {
+            case 0: try{ localSets[i]->Remove(randomOutRange(Alphabet.Min(), Alphabet.Max())); } catch (std::length_error &e) { std::cout << "Exception in Remove: " << e.what() << std::endl; }
+                    break;
+            case 1: try{ localSets[i]->RemovePredecessor(randomOutRange(Alphabet.Min(), Alphabet.Max())); } catch (std::length_error &e) { std::cout << "Exception in RemovePredescesor: " << e.what() << std::endl; }
+                    break;
+            case 2: try{ localSets[i]->RemoveSuccessor(randomOutRange(Alphabet.Min(), Alphabet.Max())); } catch (std::length_error &e) { std::cout << "Exception in RemoveSuccessor: " << e.what() << std::endl; }
+                    break;
+            case 3: try{ localSets[i]->RemoveMin(); } catch (std::length_error &e) { std::cout << "Exception in RemoveMin: " << e.what() << std::endl; }
+                    break;
+            case 4: try{ localSets[i]->RemoveMax(); } catch (std::length_error &e) { std::cout << "Exception in RemoveMax: " << e.what() << std::endl; }
+                    break;
+          }
+        }
+      }
+      lasd::Vector datas(getRandomUniqueTraversableContainer(Alphabet, 1, 1));
+      for (ulong i = 0; i < NUM_OF_SET/2; ++i) { 
+        if (localSets[i]->Empty()) {
+
+          switch (randomInRange(0, 3)) {
+            case 0: try{ localSets[i]->Insert(datas[randomInRange(0, datas.Size()-1)]); } catch (std::length_error &e) { std::cout << "Exception in Insert(cpy): " << e.what() << std::endl; }
+                    break;
+            case 1: try{ localSets[i]->InsertAll(datas); } catch (std::length_error &e) { std::cout << "Exception in InsertAll(cpy): " << e.what() << std::endl; }
+                    break;
+            case 2: try{ localSets[i]->Insert(randomOutRange(Alphabet.Min(), Alphabet.Max())); } catch (std::length_error &e) { std::cout << "Exception in Insert(move): " << e.what() << std::endl; }
+                    break;
+            case 3: try{ localSets[i]->InsertSome(getRandomTraversableContainer(Alphabet, 1, 1)); } catch (std::length_error &e) { std::cout << "Exception in InsertSome(move): " << e.what() << std::endl; }
+          }
+        }
+      }
+      for (ulong i = NUM_OF_SET/2; i < NUM_OF_SET; ++i) {
+        localSets[i]->RemoveSome(*localSets[i]);
+        localSets[i]->InsertSome(*localSets[i-1]);
+      }
+      TraversablesTest<Data, int>(*localSets[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localSets[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::Set<Data>* localCopies[NUM_OF_SET] {};
+      for (ulong i = 0; i < NUM_OF_SET; ++i) {
+        if (typeid(*localSets[i]) == typeid(lasd::SetVec<Data>)) {
+          vecCopies[i] = lasd::SetVec<Data>(*dynamic_cast<lasd::SetVec<Data>*>(localSets[i]));
+          localCopies[i] = &vecCopies[i];
+        } else if (typeid(*localSets[i]) == typeid(lasd::SetLst<Data>)) {
+          lstCopies[i] = lasd::SetLst<Data>(*dynamic_cast<lasd::SetLst<Data>*>(localSets[i]));
+          localCopies[i] = &lstCopies[i];
+        }
+      }
+      TraversablesTest<Data, int>(*localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      if (!(localCopies[0] == &vecCopies[0])^(localCopies[1]==&vecCopies[1])) {
+        if (localCopies[1] == &vecCopies[1]) {
+            *dynamic_cast<lasd::SetVec<Data>*>(localCopies[1]) = std::move(*dynamic_cast<lasd::SetVec<Data>*>(localCopies[0]));
+        } else {
+            *dynamic_cast<lasd::SetLst<Data>*>(localCopies[1]) = std::move(*dynamic_cast<lasd::SetLst<Data>*>(localCopies[0]));
+        }      
+      }else
+      {
+        localCopies[1]->RemoveSome(*localCopies[1]);
+        localCopies[1]->InsertSome(*localCopies[0]);
+      }
+      TraversablesTest<Data, int>(*localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Multiply<lasd::Set<Data>> = [&](lasd::Set<Data>* localSets[NUM_OF_SET])
+    {
+      lasd::SetVec<Data> vecCopies[NUM_OF_SET];
+      lasd::SetLst<Data> lstCopies[NUM_OF_SET];
+      TraversablesTest<Data, int>(*localSets[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localSets[1], travF<Data>, foldF<Data, int>, 0);
+      const lasd::LinearContainer<Data>& localLinear = getRandomUniqueTraversableContainer(Alphabet,2,20);
+      do {
+        for (ulong j = 0; j < 2; j++)
+          switch (randomInRange(0, 1)) {
+            case 0: localSets[0]->Insert(localLinear[randomInRange(0, localLinear.Size() - 1)]); // size protected
+                  break;
+            case 1: try {localSets[0]->Insert(randomOutRange(localSets[0]->Min(), localSets[0]->Max())); } catch (std::length_error &e) {};
+                  break;
+          }
+      } while (localSets[0]->Size() < localLinear.Size());
+      for (ulong i = NUM_OF_SET/2; i < NUM_OF_SET; ++i) {
+        localSets[i]->InsertAll(*localSets[i-1]);
+      }
+      TraversablesTest<Data, int>(*localSets[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localSets[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::Set<Data>* localCopies[NUM_OF_SET] {};
+      for (ulong i = 0; i < NUM_OF_SET; ++i) {
+        if (typeid(*localSets[i]) == typeid(lasd::SetVec<Data>)) {
+          vecCopies[i] = lasd::SetVec<Data>(*dynamic_cast<lasd::SetVec<Data>*>(localSets[i]));
+          localCopies[i] = &vecCopies[i];
+        } else if (typeid(*localSets[i]) == typeid(lasd::SetLst<Data>)) {
+          lstCopies[i] = lasd::SetLst<Data>(*dynamic_cast<lasd::SetLst<Data>*>(localSets[i]));
+          localCopies[i] = &lstCopies[i];
+        }
+      }
+      TraversablesTest<Data, int>(*localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      if (!(localCopies[0] == &vecCopies[0])^(localCopies[1]==&vecCopies[1])) {
+        if (localCopies[1] == &vecCopies[1]) {
+            *dynamic_cast<lasd::SetVec<Data>*>(localCopies[1]) = std::move(*dynamic_cast<lasd::SetVec<Data>*>(localCopies[0]));
+        } else {
+            *dynamic_cast<lasd::SetLst<Data>*>(localCopies[1]) = std::move(*dynamic_cast<lasd::SetLst<Data>*>(localCopies[0]));
+        }      
+      }
+      else
+      {
+        localCopies[1]->RemoveSome(*localCopies[1]);
+        localCopies[1]->InsertSome(*localCopies[0]);
+      }
+      TraversablesTest<Data, int>(*localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Empty<lasd::PQHeap<Data>> = [&](lasd::PQHeap<Data>* localPQs[NUM_OF_PQ])
+    {
+      TraversablesTest<Data, int>(*localPQs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localPQs[1], travF<Data>, foldF<Data, int>, 0);
+      for (ulong i = 0; i < 2*NUM_OF_PQ; ++i) {
+        while (localPQs[i]->Size() > 0) {
+          try { localPQs[i]->RemoveTip(); } catch (std::length_error &e) { std::cout << "Exception in RemoveMin: " << e.what() << std::endl; }
+        }
+      }
+      TraversablesTest<Data, int>(*localPQs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localPQs[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::PQHeap<Data> localCopies[2*NUM_OF_PQ] = { *localPQs[0], *localPQs[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      localCopies[0].Clear();
+      for (ulong i = 1; i < 2*NUM_OF_PQ; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      for (ulong i = 0; i < 2*NUM_OF_PQ; ++i) {
+        localCopies[i].Clear();
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Singletonize<lasd::PQHeap<Data>> = [&](lasd::PQHeap<Data>* localPQs[NUM_OF_PQ])
+    {
+      TraversablesTest<Data, int>(*localPQs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localPQs[1], travF<Data>, foldF<Data, int>, 0);
+      for (ulong i = 0; i < 2*NUM_OF_PQ; ++i) {
+        while (localPQs[i]->Size() > 1) {
+          try { localPQs[i]->RemoveTip(); } catch (std::length_error &e) { std::cout << "Exception in RemoveMin: " << e.what() << std::endl; }
+        }
+      }
+      if (localPQs[0]->Size() == 1)
+        localPQs[0]->RemoveTip();
+      if (localPQs[0]->Empty()) {
+        Data dat = randomInRange(Alphabet.Min(), Alphabet.Max());
+        try { localPQs[0]->Insert(dat); } catch (std::length_error &e) { std::cout << "Exception in Insert(cpy): " << e.what() << std::endl; }
+      }
+      for (ulong i = 1; i < 2*NUM_OF_PQ; ++i) {
+        *localPQs[i] = *localPQs[i-1];
+      }
+      TraversablesTest<Data, int>(*localPQs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localPQs[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::PQHeap<Data> localCopies[2*NUM_OF_PQ] = { *localPQs[0], *localPQs[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      localCopies[0].Change(0, randomInRange(Alphabet.Min(), Alphabet.Max()));
+      for (ulong i = 1; i < 2*NUM_OF_PQ; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    Multiply<lasd::PQHeap<Data>> = [&](lasd::PQHeap<Data>* localPQs[NUM_OF_PQ])
+    {
+      TraversablesTest<Data, int>(*localPQs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localPQs[1], travF<Data>, foldF<Data, int>, 0);
+      const lasd::LinearContainer<Data>& localLinear = getRandomTraversableContainer(Alphabet,2,20);
+      do {
+        for (ulong j = 0; j < 2; j++)
+          switch (randomInRange(0, 1)) {
+            case 0: localPQs[0]->Insert(localLinear[randomInRange(0, localLinear.Size() - 1)]); // size protected
+                  break;
+            case 1: localPQs[0]->Insert(randomOutRange(Alphabet.Min(), Alphabet.Max()));
+                  break;
+          }
+      } while (localPQs[0]->Size() < localLinear.Size());
+      for (ulong i = 1; i < NUM_OF_PQ; ++i) {
+        *localPQs[i] = *localPQs[i-1];
+      }
+      TraversablesTest<Data, int>(*localPQs[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(*localPQs[1], travF<Data>, foldF<Data, int>, 0);
+
+      lasd::PQHeap<Data> localCopies[2*NUM_OF_PQ] = { *localPQs[0], *localPQs[1] };
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+      ulong maxSize = randomInRange(2, 20);
+      do {
+        for (ulong j = 0; j < 2; j++)
+          switch (randomInRange(0, 1)) {
+            case 0: localCopies[0].Insert(randomOutRange(Alphabet.Min(), Alphabet.Max()));
+                  break;
+            case 1: localCopies[0].Insert(randomOutRange(Alphabet.Min(), Alphabet.Max()));
+                  break;
+          }
+      } while (localCopies[0].Size() < maxSize);
+      for (ulong i = 1; i < NUM_OF_PQ; ++i) {
+        localCopies[i] = std::move(localCopies[i-1]);
+      }
+      TraversablesTest<Data, int>(localCopies[0], travF<Data>, foldF<Data, int>, 0);
+      TraversablesTest<Data, int>(localCopies[1], travF<Data>, foldF<Data, int>, 0);
+    };
+
+    bool executed[4]{};
+    while (!executed[0] || !executed[1] || !executed[2] || !executed[3]) {
+      switch(randomInRange(static_cast<int>(Algebra::VEC), static_cast<int>(Algebra::PQ)))
+      {
+        case static_cast<int>(Algebra::VEC):
+          if (executed[0]) break;
+          std::cout << "Testing a Vector" << std::endl;
+          std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
+          {
+            std::string ans;
+            std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+            if (ans == "1") {
+              std::cout << testBox;
+              std::cout << "Press Enter to continue..." << std::endl;
+              std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
+          }
+          std::cout << "Random seed: " << BoxRandomTester<Data>::seed << std::endl; 
+          {
+            static bool done[6]{};
+            if (!done[0]) { Empty<lasd::Vector<Data>>(localVecs); done[0] = true; break; }
+            if (!done[1]) { Singletonize<lasd::Vector<Data>>(localVecs); done[1] = true; break; }
+            if (!done[2]) { Empty<lasd::Vector<Data>>(localVecs); done[2] = true; break; }          
+            if (!done[3]) { Multiply<lasd::Vector<Data>>(localVecs); done[3] = true; break; }
+            if (!done[4]) { Singletonize<lasd::Vector<Data>>(localVecs); done[4] = true; break; }
+            if (!done[5]) { Empty<lasd::Vector<Data>>(localVecs); done[5] = true; }
+          }
+          executed[0] = true;
+          break;
+        case static_cast<int>(Algebra::LST): {
+          if (executed[1]) break;
+          std::cout << "Testing a List" << std::endl;
+          std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
+          {
+            std::string ans;
+            std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+            if (ans == "1") {
+              std::cout << testBox;
+              std::cout << "Press Enter to continue..." << std::endl;
+              std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
+          }
+          std::cout << "Random seed: " << BoxRandomTester<Data>::seed << std::endl;           
+          {
+            static bool done[6]{};
+            if (!done[0]) { Empty<lasd::List<Data>>(localLists); done[0] = true; break; }
+            if (!done[1]) { Singletonize<lasd::List<Data>>(localLists); done[1] = true; break; }
+            if (!done[2]) { Empty<lasd::List<Data>>(localLists); done[2] = true; break; }          
+            if (!done[3]) { Multiply<lasd::List<Data>>(localLists); done[3] = true; break; }
+            if (!done[4]) { Singletonize<lasd::List<Data>>(localLists); done[4] = true; break; }
+            if (!done[5]) { Empty<lasd::List<Data>>(localLists); done[5] = true; }
+          }
+          executed[1] = true;
+          break;
+        }
+        case static_cast<int>(Algebra::SET): {
+          if (executed[2]) break;
+          std::cout << "Testing a Set" << std::endl;
+          std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
+          {
+            std::string ans;
+            std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+            if (ans == "1") {
+              std::cout << testBox;
+              std::cout << "Press Enter to continue..." << std::endl;
+              std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
+          }
+          std::cout << "Random seed: " << BoxRandomTester<Data>::seed << std::endl;           
+          {
+            static bool done[6]{};
+            if (!done[0]) { Empty<lasd::Set<Data>>(localSets); done[0] = true; break; }
+            if (!done[1]) { Singletonize<lasd::Set<Data>>(localSets); done[1] = true; break; }
+            if (!done[2]) { Empty<lasd::Set<Data>>(localSets); done[2] = true; break; }          
+            if (!done[3]) { Multiply<lasd::Set<Data>>(localSets); done[3] = true; break; }
+            if (!done[4]) { Singletonize<lasd::Set<Data>>(localSets); done[4] = true; break; }
+            if (!done[5]) { Empty<lasd::Set<Data>>(localSets); done[5] = true; }
+          }
+          executed[2] = true;
+          break;
+        }
+        case static_cast<int>(Algebra::PQ): {
+          if (executed[3]) break;
+          std::cout << "Testing a Priority Queue" << std::endl;
+          std::cout << "Enter to continue, If print is desired press 1..." <<  std::endl;
+          {
+            std::string ans;
+            std::getline(std::cin, ans); // Legge tutta la riga, anche vuota
+            if (ans == "1") {
+              std::cout << testBox;
+              std::cout << "Press Enter to continue..." << std::endl;
+              std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
+          }
+          std::cout << "Random seed: " << BoxRandomTester<Data>::seed << std::endl;           
+          {
+            static bool done[6]{};
+            if (!done[0]) { Empty<lasd::PQHeap<Data>>(localPQs); done[0] = true; break; }
+            if (!done[1]) { Singletonize<lasd::PQHeap<Data>>(localPQs); done[1] = true; break; }
+            if (!done[2]) { Empty<lasd::PQHeap<Data>>(localPQs); done[2] = true; break; }          
+            if (!done[3]) { Multiply<lasd::PQHeap<Data>>(localPQs); done[3] = true; break; }
+            if (!done[4]) { Singletonize<lasd::PQHeap<Data>>(localPQs); done[4] = true; break; }
+            if (!done[5]) { Empty<lasd::PQHeap<Data>>(localPQs); done[5] = true; }
+          }
+          executed[3] = true;
+          break;
+        }
+      }
+    }
   }
 
 } // namespace myT
@@ -3044,7 +3677,10 @@ void mytest()
     return acc + (boxTester.setVec2.Exists(dat) ? 1 : 0);
   };
 
+  std::cout << "Gentest1:" << std::endl;
   Gentest1<DataT>(boxTester.setVec2);
+  std::cout << "Gentest2:" << std::endl;
+  Gentest2<DataT>(boxTester.setVec2);
 
   std::cout << "\nvector1 contents: ";
   boxTester.vector1.Map(
@@ -3058,8 +3694,6 @@ void mytest()
   /* Prova */ {
 
     using Box = lasd::SetVec<DataT>;
-
-    globalBox<lasd::List<DataT>>;
     globalBox<Box> = &boxTester.setVec1;
 
     std::cout << globalBox<Box>->Size() << std::endl;
