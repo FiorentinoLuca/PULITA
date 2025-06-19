@@ -99,7 +99,7 @@ inline Data SetVec<Data>::MinNRemove() {
   if (Empty()) throw std::length_error("Set is empty"); // #TODO corrected: -> if(Empty()) throw std::length_error("SetVec is empty");
   Data& ret = (*this)[0];
   RemoveMin();
-  return ret;
+  return ret; // std::move(ret);
 }
 
 template <typename Data>
@@ -164,7 +164,7 @@ inline Data SetVec<Data>::PredecessorNRemove(const Data& dat) {
   Shift(idx, -1);
   EnsureCapacity(numElements);
 
-  return pred;
+  return pred; // std::move(pred);
 }
 
 template <typename Data>
@@ -199,7 +199,7 @@ inline Data SetVec<Data>::SuccessorNRemove(const Data& dat) {
   Shift(idx, -1);
   EnsureCapacity(numElements);
 
-  return ret;
+  return ret; // std::move(ret);
 }
 
 template <typename Data>
