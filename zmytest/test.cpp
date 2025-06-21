@@ -16,6 +16,7 @@
 #include "../set/lst/setlst.hpp"
 #include "../heap/vec/heapvec.hpp"      // <-- HeapVec
 #include "../pq/heap/pqheap.hpp"        // <-- PQHeap
+#include "../binarytree/vec/bvec.hpp"
 
 /* ************************************************************************** */
 
@@ -3642,6 +3643,8 @@ using namespace myT;
 
 template <typename Box>
 Box *globalBox;
+
+template class lasd::BVecT<DataT>;
 
 void mytest()
 {
