@@ -86,9 +86,6 @@ public:
 
   using LinearContainer<Data>::Front;
   using HeapVec<Data>::HeapifyDown;
-  using HeapVec<Data>::Traverse;
-  using HeapVec<Data>::PreOrderTraverse;
-  using HeapVec<Data>::PostOrderTraverse;
   using HeapVec<Data>::Empty;
 
 protected:

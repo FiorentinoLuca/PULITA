@@ -16,7 +16,9 @@
 #include "../set/lst/setlst.hpp"
 #include "../heap/vec/heapvec.hpp"      // <-- HeapVec
 #include "../pq/heap/pqheap.hpp"        // <-- PQHeap
-#include "../binarytree/vec/bvec.hpp"
+// #include "../binarytree/vec/bvec.hpp"
+// #include "../binarytree/lnk/blnk.hpp"
+
 
 /* ************************************************************************** */
 
@@ -490,7 +492,7 @@ namespace myT
       }
     );
 
-    return std::move(travCont);
+    return std::move(travCont); // look for al -pesimizing warning looking for return std::... in the code base
   }
 
   template <typename Data>
@@ -3644,7 +3646,10 @@ using namespace myT;
 template <typename Box>
 Box *globalBox;
 
-template class lasd::BVecT<DataT>;
+// template class lasd::BVecT<DataT>;
+// template class lasd::BVecTInOrderIt<DataT>;
+// template class lasd::BLnkT<DataT>;
+// template class lasd::BTInOrderIt<DataT>;
 
 void mytest()
 {
@@ -3655,7 +3660,7 @@ void mytest()
   std::cout << "Random seed: " << BoxRandomTester<DataT>::seed << std::endl;
   
   BoxRandomTester<DataT> boxTester;
-  std::vector<DataT> alphabetData = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
+  std::vector<DataT> alphabetData = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "90"};
   boxTester.vector1 = lasd::Vector<DataT>(alphabetData.size());
   {
     int i = 0;
@@ -3680,10 +3685,10 @@ void mytest()
     return acc + (boxTester.setVec2.Exists(dat) ? 1 : 0);
   };
 
-  std::cout << "Gentest1:" << std::endl;
-  Gentest1<DataT>(boxTester.setVec2);
-  std::cout << "Gentest2:" << std::endl;
-  Gentest2<DataT>(boxTester.setVec2);
+  // std::cout << "Gentest1:" << std::endl;
+  // Gentest1<DataT>(boxTester.setVec2);
+  // std::cout << "Gentest2:" << std::endl;
+  // Gentest2<DataT>(boxTester.setVec2);
 
   std::cout << "\nvector1 contents: ";
   boxTester.vector1.Map(
@@ -3870,6 +3875,23 @@ void mytest()
     // globalBox<Box>->Traverse([](const DataT &dat){std::cout << dat << ", ";}); std::cout << std::endl;
 
   }
+
+
+
+  // lasd::BVecT<DataT> myvec(boxTester.setVec2);
+
+  // std::cout << "InOrderTraversing:" <<  std::endl;
+  // lasd::BTree<DataT>::InOrderTraversingThrough(myvec, [](const DataT& dat){std::cout << dat <<  std::endl;});
+
+  // std::cout << "" <<  std::endl;
+  // // myvec.lasd::PreOrderTraversableContainer<DataT>::Traverse([](const DataT& dat){ std::cout << dat;
+  // std::cout << ", "; });
+  // std::cout << "" <<  std::endl;
+
+  // std::cout << "" <<  std::endl;
+  // boxTester.setVec2.lasd::PreOrderTraversableContainer<DataT>::Traverse([](const DataT& dat){ std::cout << dat;
+  // std::cout << ", "; });
+  // std::cout << "" <<  std::endl;
 
   std::cout << "Random seed: " << BoxRandomTester<DataT>::seed << std::endl;
   std::cin.get();

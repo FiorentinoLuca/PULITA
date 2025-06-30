@@ -165,6 +165,18 @@ protected:
 
 };
 
+// {
+//   ulong delta = card(lIdx, rIdx);
+//   if (delta == 0) return;
+//   int mid = lIdx + std::ceil(float(delta)/2)-1;
+//   if (mid > lIdx)
+//     recursiveInOrder(box, f, lIdx, mid-1);
+//   f(box[mid]);
+//   if (mid < rIdx)
+//     recursiveInOrder(box, f, mid+1, rIdx);
+//   return;
+// };
+
 /* ************************************************************************** */
 
 }

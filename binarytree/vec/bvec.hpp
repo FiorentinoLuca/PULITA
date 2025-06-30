@@ -12,24 +12,76 @@ namespace lasd {
 
 /* ************************************************************************** */
 
+
 template <typename Data>
-class BVecT: virtual public BTree<Data>, virtual protected Vector<Data> {
+class BVecT;
+
+template <typename Data>
+class BVecTInOrderIt: virtual public Iterator<Data> {
 
 private:
 
 protected:
 
-  ulong rootIdx;
-  Vector<bool> areNodes;
+BVecT<Data> &root;
+BTree<Data> *current;
 
 public:
 
+  BVecTInOrderIt(BVecT<Data>&);
+
+  virtual
+  ~BVecTInOrderIt();
+
+  bool IsTerminated() const noexcept override;
+
+  Data operator*() override;
+
+  Iterator<Data>& operator++() override;
+
+  Iterator<Data>& operator+(int idx) override;
+
+  int operator-(Iterator<Data>& other) override;
+
+  void Reset() override;
+
+protected:
+
+  BTree<Data>& LeftMostNode();
+
+};
+
+template <typename Data>
+class BVecT: virtual public BTree<Data> {
+
+private:
+
+protected:
+
+  ulong idx;
+  ulong size;
+  BvecTRoot* nodes;
+
+public:
+
+  struct BvecTRoot : virtual protected Vector<Data>
+  {
+
+  protected:
+    
+    BVecTRoot(ulong);
+
+  public:
+  
+    ~BVectTRoot();
+  };
+  
   // Default constructor
-  BVecT();
+  BVecT() = default;
 
   // Specific constructor
-  BVecT(const TraversableContainer<Data>&);
-  BVecT(MappableContainer<Data>&&);
+  BVecT(const LinearContainer<Data>&);
+  BVecT(MutableLinearContainer<Data>&&);
   BVecT(const BVecT<Data>&);
   BVecT(BVecT<Data>&&);
   BVecT(const Data& dat);
@@ -54,11 +106,12 @@ public:
   BTree<Data>& L() override;
   BTree<Data>& R() override;
 
-  void InsertBefore(const Data&, ulong) override;
-  void InsertBefore(Data&&, ulong) override;
+  bool HasLeft() const noexcept override;
+  bool HasRight() const noexcept override;
 
-  void InsertAfter(const Data&, ulong) override;
-  void InsertAfter(Data&&, ulong) override;
+  const Data& Element() const& override;
+  Data& Element() & override;
+  Data&& Element() && override;
 
   const Data& operator[](ulong) const override; // (non-mutable version; must throw std::out_of_range when out of range)
   Data& operator[](ulong) override; // (mutable version; must throw std::out
@@ -68,11 +121,16 @@ public:
 protected:
 
   // Specific member functions
-  ulong calcLeftIdx(ulong);
-  ulong calcRightIdx(ulong);
   using Vector<Data>::buffer;
+  using BTree<Data>::InOrderMappingThrough;
+  using Container::Empty;
+
+  friend void ::mytest();
+  friend class BVecTInOrderIt<Data>;
   
 };
+
+
 
 } // namespace lasd
 

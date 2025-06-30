@@ -81,6 +81,7 @@ public:
   void PostOrderTraverse(TraverseFun) const override; // Override PostOrderTraversableContainer member
 
   using Container::Size;
+  using Container::Empty;
 
 };
 
@@ -100,7 +101,6 @@ private:
 protected:
 
   // ...
-  using Container::size; // Inherit size from LinearContainer
 
 public:
 
@@ -120,18 +120,14 @@ public:
 
   // Specific member functions
 
-  const Data& operator[](ulong) const override = 0; // (non-mutable version; concrete function must throw std::out_of_range when out of range)
-
-  const Data& Front() const override; // (non-mutable version; concrete function must throw std::length_error when empty)
-
-  const Data& Back() const override; // (non-mutable version; concrete function must throw std::length_error when empty)
+  using LinearContainer<Data>:: operator[];
+  using LinearContainer<Data>:: Front;
+  using LinearContainer<Data>:: Back;
 
   virtual
   Data& operator[](ulong); // (mutable version; concrete function must throw std::out_of_range when out of range)
-  
   virtual
   Data& Front(); // (mutable version; concrete function must throw std::length_error when empty)
-  
   virtual
   Data& Back(); // (mutable version; concrete function must throw std::length_error when empty)
 
@@ -156,7 +152,6 @@ public:
   void PostOrderMap(MapFun) override; // Override PostOrderMappableContainer member
 
   using LinearContainer<Data>::Traverse;
-
   using Container::Size;
 
 };
@@ -172,7 +167,6 @@ private:
 protected:
 
   // ...
-  using Container::size; // Inherit size from MutableLinearContainer
 
 public:
 

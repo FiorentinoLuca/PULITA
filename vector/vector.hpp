@@ -24,7 +24,7 @@ private:
 
 protected:
 
-  using Container::size;
+  // using Container::size; // si riesce a fare il lookup nella prima fase grazie a che lo eredita da Resizable no template
   Data *buffer;
 
   // ...
@@ -73,21 +73,15 @@ public:
 
   // Specific member functions (inherited from MutableLinearContainer)
 
-  Data& operator[](ulong) override; // type operator[](argument) specifiers; // Override MutableLinearContainer member (must throw std::out_of_range when out of range)
-  
-  Data& Front()  override; // type Front() specifiers; // Override MutableLinearContainer member (must throw std::length_error when empty)
-  
-  Data& Back()  override; // type Back() specifiers; // Override MutableLinearContainer member (must throw std::length_error when empty)
+  using MutableLinearContainer<Data>:: operator[];
+  using MutableLinearContainer<Data>:: Front;
+  using MutableLinearContainer<Data>:: Back;
 
   /* ************************************************************************ */
 
   // Specific member functions (inherited from LinearContainer)
 
   const Data& operator[](ulong) const override; // Override LinearContainer member (must throw std::out_of_range when out of range)
-  
-  const Data& Front() const override; // Override LinearContainer member (must throw std::length_error when empty)
-  
-  const Data& Back() const override; // Override LinearContainer member (must throw std::length_error when empty)
 
   /* ************************************************************************ */
 
@@ -101,7 +95,7 @@ public:
 
   void Clear() noexcept override; // Override ClearableContainer member
  
-  using LinearContainer<Data>::Traverse;
+  void Traverse(typename TraversableContainer<Data>::TraverseFun f) const override;
 
 protected:
 
@@ -128,8 +122,6 @@ private:
   // ...
 
 protected:
-
-  using Container::size;
 
   // ...
 

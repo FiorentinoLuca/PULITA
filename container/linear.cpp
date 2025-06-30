@@ -28,13 +28,17 @@ inline bool LinearContainer<Data>::operator!=(const LinearContainer<Data>& other
 template <typename Data>
 inline const Data &LinearContainer<Data>::Front()
   const {
-    return operator[](0);
+    if (Empty())
+      throw std::length_error("Invalid access to empty linear container");
+  return operator[](0);
 }
 
 template <typename Data>
 inline const Data &LinearContainer<Data>::Back()
   const {
-    return operator[](Size() - 1);
+    if (Empty())
+      throw std::length_error("Invalid access to empty linear container");
+  return operator[](Size() - 1);
 }
 
 template <typename Data>
@@ -77,7 +81,7 @@ inline void LinearContainer<Data>::PostOrderTraverse(TraverseFun f)
 
 /* ***************************MutableLinearContainer********************************* */
 
-// Non Mutable
+// Mutable
 
 template <typename Data>
 inline Data& MutableLinearContainer<Data>::operator[](ulong index)
@@ -87,31 +91,17 @@ inline Data& MutableLinearContainer<Data>::operator[](ulong index)
 }
 
 template <typename Data>
-inline const Data& MutableLinearContainer<Data>::Front()
-  const {
-    return (*static_cast<const MutableLinearContainer<Data>*>(this))
-                                                     .operator[](0);
-}
-
-// Mutable
-
-template <typename Data>
-inline const Data& MutableLinearContainer<Data>::Back()
-  const {
-    return (*static_cast<const MutableLinearContainer<Data>*>(this))
-                                                .operator[](Size()-1);
-}
-
-template <typename Data>
 inline Data& MutableLinearContainer<Data>::Front()
 {
-  return (*this)[0];
+  return const_cast<Data&>(static_cast<const MutableLinearContainer<Data>*>
+                                                          (this)->Front());
 }
 
 template <typename Data>
 inline Data& MutableLinearContainer<Data>::Back()
 {
-  return (*this).operator[](Size()-1);
+  return const_cast<Data&>(static_cast<const MutableLinearContainer<Data>*>
+                                                           (this)->Back());
 }
 
 template <typename Data>

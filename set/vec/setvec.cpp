@@ -11,40 +11,27 @@ const ulong SetVec<Data>::initialSize = 10;
 
 template <typename Data>
 SetVec<Data>::SetVec()
-  : Vector<Data>(initialSize), numElements(0) {}
+  : Vector<Data>(initialSize), head(0), numElements(0) {}
 
 template <typename Data>
 SetVec<Data>::SetVec(const TraversableContainer<Data>& box)
-  : Vector<Data>(box.Size()) {
-
-  box.Traverse(
-    [this](const Data &dat)
-    {
-      Insert(dat);
-    }
-  );
-  
+  : Vector<Data>(box.Size()), head(0), numElements(0) {
+  InsertAll(box);
 }
 
 template <typename Data>
 SetVec<Data>::SetVec(MappableContainer<Data>&& box)
-  : Vector<Data>(box.Size()) {
-
-  box.Map(
-    [this](Data& dat)
-    {
-      Insert(std::move(dat));
-    }
-  );
+  : Vector<Data>(box.Size()), head(0), numElements(0) {
+  InsertAll(box);
 }
 
 template <typename Data>
 SetVec<Data>::SetVec(const SetVec<Data>& other) 
-  : Vector<Data>(other), numElements(other.numElements) {}
+  : Vector<Data>(other), head(0), numElements(other.numElements) {}
 
 template <typename Data>
 SetVec<Data>::SetVec(SetVec<Data>&& other)
-  noexcept {
+  noexcept : SetVec<Data>() {
     *this = std::move(other);
 }
 
@@ -104,7 +91,7 @@ inline Data SetVec<Data>::MinNRemove() {
 
 template <typename Data>
 inline void SetVec<Data>::RemoveMin() {
-  if (numElements == 0) {
+  if (Empty()) {
     throw std::length_error("SetVec is empty");
   }
   Shift(0,-1);
@@ -124,7 +111,7 @@ inline Data SetVec<Data>::MaxNRemove()
   if (Empty()) throw std::length_error("Set is empty"); // #TODO corrected: -> if(Empty()) throw std::length_error("SetVec is empty");
   Data ret = (*this)[numElements - 1];
   RemoveMax();
-  return std::move(ret);
+  return std::move(ret); //pesimizing
 }
 
 template <typename Data>
@@ -209,27 +196,6 @@ inline void SetVec<Data>::RemoveSuccessor(const Data& dat) {
 }
 
 template <typename Data>
-bool SetVec<Data>::Insert(const Data& dat) {
-  /*
-  int foundIndex = BSearch(dat);
-
-  if (foundIndex != -1 && (*this)[foundIndex] == dat)
-                                        return false;
-
-  EnsureCapacity(numElements + 1);
-
-  Shift(foundIndex, 1);
-  foundIndex = foundIndex+1;
-
-  (*this)[foundIndex] = dat;
-
-  return true;
-  */
- 
-  return AttachWithIn(dat, numElements + 1);
-}
-
-template <typename Data>
 bool SetVec<Data>::AttachWithIn(const Data& dat, ulong dim)
 {
   int foundIndex = BSearch(dat);
@@ -266,32 +232,23 @@ bool SetVec<Data>::AttachWithIn(Data&& dat, ulong dim)
 }
 
 template <typename Data>
+bool SetVec<Data>::Insert(const Data& dat) {
+  return AttachWithIn(dat, numElements + 1);
+}
+
+template <typename Data>
 bool SetVec<Data>::Insert(Data&& dat) {
-  /*
-    int foundIndex = BSearch(dat);
-
-    if (foundIndex != -1 && (*this)[foundIndex] == dat) 
-                                          return false;
-
-    EnsureCapacity(numElements + 1);
-
-    Shift(foundIndex, 1);
-    foundIndex = foundIndex+1;
-
-    (*this)[foundIndex] = std::move(dat);
-
-  return true;
-  */
   return AttachWithIn(std::move(dat), numElements + 1);
 }
 
 template <typename Data>
 bool SetVec<Data>::InsertAll(const TraversableContainer<Data>& box) {
   bool check = true;
+  ulong oldCard = numElements;
   box.Traverse(
-    [this, &box, &check](const Data&dat)
+    [this, &box, &check, oldCard](const Data&dat)
     {
-      check = (AttachWithIn(dat, box.Size()) && check);
+      check = (AttachWithIn(dat, box.Size()+oldCard) && check);
     }
   );
   return check;
@@ -300,10 +257,11 @@ bool SetVec<Data>::InsertAll(const TraversableContainer<Data>& box) {
 template <typename Data>
 bool SetVec<Data>::InsertAll(MappableContainer<Data>&& box) {
   bool check = true;
+  ulong oldCard = numElements;
   box.Map(
-    [this, &box, &check](Data& dat)
+    [this, &box, &check, oldCard](Data& dat)
     {
-      check = (AttachWithIn(std::move(dat), box.Size()) && check);
+      check = (AttachWithIn(std::move(dat), box.Size()+oldCard) && check);
     }
   );
   return check;
@@ -312,10 +270,11 @@ bool SetVec<Data>::InsertAll(MappableContainer<Data>&& box) {
 template <typename Data>
 bool SetVec<Data>::InsertSome(const TraversableContainer<Data>& box) {
   bool check = false;
+  ulong oldCard = numElements;
   box.Traverse(
-    [this, &box, &check](const Data& dat)
+    [this, &box, &check, oldCard](const Data& dat)
     {
-      check = (AttachWithIn(dat, box.Size()) || check);
+      check = (AttachWithIn(dat, box.Size()+oldCard) || check);
     }
   );
   return check;
@@ -324,10 +283,11 @@ bool SetVec<Data>::InsertSome(const TraversableContainer<Data>& box) {
 template <typename Data>
 bool SetVec<Data>::InsertSome(MappableContainer<Data>&& box) {
   bool check = false;
+  ulong oldCard = numElements;
   box.Map(
-    [this, &box, &check](Data& dat)
+    [this, &box, &check, oldCard](Data& dat)
     {
-      check = (AttachWithIn(std::move(dat), box.Size()) || check);
+      check = (AttachWithIn(std::move(dat), box.Size()+oldCard) || check);
     }
   );
   return check;
@@ -355,7 +315,7 @@ const Data& SetVec<Data>::operator[](ulong idx)
     if (idx >= numElements) 
       throw std::out_of_range("Index out of range");
     
-    return Vector<Data>::operator[](mod(idx + head, size));
+  return buffer[mod(idx + head, size)];
 }
 
 template <typename Data>
@@ -419,11 +379,7 @@ void SetVec<Data>::PostOrderTraverse(typename TraversableContainer<Data>::Traver
 template <typename Data>
 Data& SetVec<Data>::operator[](ulong idx)
 {
-    
-  if (idx >= numElements) 
-    throw std::out_of_range("Index out of range");
-  
-  return Vector<Data>::operator[](mod(idx + head, size));
+  return const_cast<Data&>(static_cast<const SetVec<Data>*>(this)->operator[](idx));
 }
 
 template <typename Data>
@@ -449,16 +405,16 @@ void SetVec<Data>::EnsureCapacity(ulong dim)
       Resize(initialSize);
       return;
     }
-    Resize(static_cast<ulong>(std::ceil(resizingFactor*size))); // #TODO corrected: resizingFactor*size -> std::ceil(resizingFactor*size)
+    Resize( std::max(dim, static_cast<ulong>(std::ceil(resizingFactor*size))) ); // #TODO corrected: resizingFactor*size ->  std::max(dim, static_cast<ulong>(std::ceil(resizingFactor*size)))
     return;
   }
 
-  if (numElements < std::ceil(resizingFactor))
+  if (dim>0 || numElements < std::ceil(resizingFactor))
                                        return;
 
   // |x|x|x|x| | | | | | -> |x|x|x|x| | |
   if (size > static_cast<ulong>(numElements*resizingFactor*resizingFactor))          
-     Resize(static_cast<ulong>(numElements*resizingFactor));
+                    Resize(static_cast<ulong>(numElements*resizingFactor));
 }
 
 template <typename Data>
@@ -479,83 +435,79 @@ void SetVec<Data>::Resize(ulong newSize)
 }
 
 template <typename Data>
-void SetVec<Data>::Transfer(SetVec<Data> &receiver, ulong srcStart, int grouping, ulong dstStart)
-{
-
-  // if (std::abs(grouping) > std::min(numElements, receiver.numElements))
-  //                    throw std::invalid_argument("non valid grouping");
-
-  // if (Set<Data>::card(dstStart, dstStart + std::abs(grouping)-1)<=receiver.size 
-  //   && Set<Data>::card(srcStart, srcStart + std::abs(grouping)-1)<=size) {
-    
-  //   int sign = (grouping < 0) ? -1 : 1;
-
-  //   ulong srcIndex, dstIndex;
-  //   for (int i = grouping; std::abs(i) > 0; i=sign*(std::abs(i)-1)) {
-
-  //     srcIndex=mod(srcStart+i-sign, numElements);
-  //     dstIndex=mod(dstStart+i-sign, receiver.numElements);
-
-  //     receiver.buffer[mod(dstIndex+receiver.head, receiver.size)] = std::move((*this).buffer[mod(srcIndex+head, size)]);
-  //   }
-
-  // } else {
-  //   throw std::length_error("Index bigger than last element's index");
-  // }
-
-  this->Vector<Data>::Transfer(receiver, srcStart, grouping, dstStart);
-}
-
-template <typename Data>
-inline bool SetVec<Data>::isLefter(int idx)
+inline bool SetVec<Data>::isLefter(int idx, int dim)
 {
   if (idx >= static_cast<int>(numElements))
     throw std::out_of_range("Index bigger than last element's index");
-  return (static_cast<int>(idx) < (static_cast<int>(numElements-(idx + 1))));
+  if (dim >= 0)
+    return (card(0,idx) < card(idx+1,numElements-1));
+  return (card(0,idx) < card(idx,numElements-1));
+}
+
+template <typename Data>
+void SetVec<Data>::LeftShift(int idx, int dim)
+{
+  ulong leftMargin = std::min(idx+1, static_cast<int>(numElements));
+  if (dim>=0)
+  {
+    numElements = numElements+dim; // la transfer usa Size()
+    head = mod(head-dim, size);
+
+    ulong oldIdx = idx+dim;
+    Transfer(*this, oldIdx-(leftMargin-1), leftMargin, idx-(leftMargin-1)); 
+  }
+  else
+  {
+    ulong leftReminder = std::max(0, dim + static_cast<int>(leftMargin));
+    ulong rightReminder = std::max(0, -dim - static_cast<int>(leftMargin)); // overflowing formula
+
+    Transfer(*this, idx+dim/*idx+dim-(leftReminder-1)*/, -leftReminder/*leftReminder*/, idx/*idx-(leftReminder-1)*/);
+    numElements = numElements+dim+rightReminder;
+    head = mod(head-dim-rightReminder, size);
+    RightShift(Empty()?0:mod(-rightReminder, numElements), -rightReminder);
+    
+  }
+}
+
+template <typename Data>
+void SetVec<Data>::RightShift(int idx, int dim)
+{
+  ulong rightMargin = card(idx+1, numElements-1);
+
+  if (dim>=0)
+  {
+    // la transfer usa Size()
+    numElements = numElements+dim;                                             
+    Transfer(*this, idx+1+(rightMargin-1), -rightMargin, idx+1+dim+(rightMargin-1)); 
+  }
+  else
+  {
+    rightMargin = card(idx, numElements-1);
+
+    ulong rightReminder = std::max(0, dim + static_cast<int>(rightMargin)); 
+    ulong leftReminder = std::max(0, -dim - static_cast<int>(rightMargin)); //overflowing formula
+                                                                                                  
+    Transfer(*this, numElements-1-(rightReminder-1), rightReminder, idx);
+    numElements = numElements+dim+leftReminder;
+    LeftShift(std::max(0, static_cast<int>(leftReminder)-1), -leftReminder);
+  }
 }
 
 template <typename Data>
 void SetVec<Data>::Shift(int idx, int dim)
 {
-
-  if (dim == 0)
-        return; //nelle stringhe evita l'annullamento dei self move
-
   if (dim > static_cast<int>(size-numElements) || dim < static_cast<int>(-numElements))
-                                    throw std::invalid_argument("non valid dimension");
+                              throw std::invalid_argument("Non valid shift dimension");
 
-  if (isLefter(idx))
+  if (idx < -1 || (idx < 0 && dim<0) || idx >= static_cast<int>(numElements))
+                          throw std::length_error("Shift idx out of bounds");
+
+  if (isLefter(idx,dim))
   {
-    if (dim>=0)
-    {
-
-      numElements = numElements+dim; 
-      head = mod(head-dim, size);
-
-      Transfer(*this, mod(idx+dim, numElements), -(idx+1), mod(idx, numElements)); 
-    }
-    else
-    {
-     
-      Transfer(*this, idx+dim-(card(0,idx+dim)-1), card(0,idx+dim), idx-(card(0,idx+dim)-1)); 
-      numElements = numElements+dim;
-      head = mod(head-dim, size);
-      
-    }
+    LeftShift(idx, dim);
     return;
   }
-  if (dim>=0)
-  {
-    idx = idx+1;
-    numElements = numElements+dim; // 0,... idx, idx+1, ... idx+idx
-    Transfer(*this, idx, card(idx, numElements-1-dim), idx+dim);
-  
-  }
-  else
-  {
-    Transfer(*this, numElements-1, -card(idx-dim, numElements-1), idx+(card(idx-dim+1, numElements-1))); // (idx+dim, -card(0,idx+dim), idx)
-    numElements = numElements+dim;
-  }
+  RightShift(idx, dim);
   
   return;
 }

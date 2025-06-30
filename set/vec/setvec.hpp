@@ -27,8 +27,8 @@ protected:
   static const ulong initialSize;
   using Container::size;
   using Vector<Data>::buffer;
-  ulong head = 0;
-  ulong numElements = 0;
+  ulong head;
+  ulong numElements;
 
   // ...
 
@@ -147,13 +147,15 @@ protected:
   ulong FindSucc(const Data&);
   void EnsureCapacity(ulong) override;
   void Resize(ulong) override;
-  void Transfer(SetVec<Data> &receiver, ulong srcStart, int grouping, ulong dstStart);
-  bool isLefter(int);
+  bool isLefter(int, int);
+  void LeftShift(int, int);
+  void RightShift(int, int);
   void Shift(int, int);
   const Data& getData(const int&) const;
   int Reach(int, ulong, int&) const;
   int BSearch(const Data&) const;
 
+  using Vector<Data>::Transfer;
   using Vector<Data>::mod;
   using Set<Data>::card;
 

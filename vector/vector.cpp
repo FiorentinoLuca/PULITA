@@ -103,51 +103,11 @@ inline bool Vector<Data>::operator!=(const Vector<Data>& other)
 }
 
 template <typename Data>
-inline Data& Vector<Data>::operator[](ulong idx)
-{
-  if (idx >= size)
-    throw std::out_of_range("Index bigger than last element's index");
-  return (*this).buffer[idx];
-}
-
-template <typename Data>
-inline Data& Vector<Data>::Front()
-{
-  if (Empty())
-    throw std::length_error("Invalid access to empty vector");
-  return (*this).MutableLinearContainer<Data>::Front();
-}
-
-template <typename Data>
-inline Data& Vector<Data>::Back()
-{
-  if (Empty())
-    throw std::length_error("Invalid access to empty vector");
-  return (*this).MutableLinearContainer<Data>::Back();
-}
-
-template <typename Data>
 inline const Data& Vector<Data>::operator[](ulong idx)
   const {
     if (idx >= size)
       throw std::out_of_range("Index bigger than last element's index");
   return this->buffer[idx];
-}
-
-template <typename Data>
-inline const Data& Vector<Data>::Front()
-  const {
-    if (Empty())
-      throw std::length_error("Invalid access to empty vector");
-    return (*this).MutableLinearContainer<Data>::Front();
-}
-
-template <typename Data>
-inline const Data& Vector<Data>::Back()
-  const {
-    if (Empty())
-      throw std::length_error("Invalid access to empty vector");
-    return (*this).MutableLinearContainer<Data>::Back();
 }
 
 template <typename Data>
@@ -171,6 +131,15 @@ void Vector<Data>::Clear()
 }
 
 template <typename Data>
+void Vector<Data>::Traverse(typename TraversableContainer<Data>::TraverseFun f) const
+{
+    for (ulong i = 0; i < size; i++)
+    {
+      f(Vector::operator[](i));
+    }
+}
+
+template <typename Data>
 inline void Vector<Data>::EnsureCapacity(ulong dim)
 {
   if (Size() != dim)
@@ -191,12 +160,12 @@ inline void Vector<Data>::Transfer(Vector<Data> &receiver, ulong srcStart, int g
   int sign = (grouping < 0) ? -1 : 1;
 
   ulong srcIndex, dstIndex;
-  for (int i = grouping; std::abs(i) > 0; i=sign*(std::abs(i)-1)) {
+  for (int i = 0; std::abs(i) < std::abs(grouping); i=sign*(std::abs(i)+1)) {
 
-    srcIndex=mod(srcStart+i-sign, Size());
-    dstIndex=mod(dstStart+i-sign, receiver.Size());
+    srcIndex=mod(srcStart+i, Size());
+    dstIndex=mod(dstStart+i, receiver.Size());
 
-    receiver[dstIndex] = std::move((*this)[srcIndex]);
+    std::swap(receiver[dstIndex], (*this)[srcIndex]);
   }
 
 }
