@@ -90,6 +90,8 @@ public:
   const Data& Back() const override;
   const Data& operator[](ulong index) const override;
 
+  using Vector<Data>::Clear;
+
 protected:
 
   // Auxiliary functions, if necessary!
