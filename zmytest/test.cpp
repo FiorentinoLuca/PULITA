@@ -493,6 +493,7 @@ namespace myT
     );
 
     return std::move(travCont); // look for al -pesimizing warning looking for return std::... in the code base
+    // https://stackoverflow.com/questions/62061433/how-to-avoid-the-pessimizing-move-warning-of-nrvo
   }
 
   template <typename Data>
